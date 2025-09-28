@@ -4,9 +4,9 @@ import api.controla_preju.dtos.forms.CreateUserForm;
 import api.controla_preju.entities.User;
 import api.controla_preju.exceptions.BusinessException;
 import api.controla_preju.repositories.UserRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {

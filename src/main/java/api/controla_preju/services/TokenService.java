@@ -19,6 +19,8 @@ public class TokenService {
 
     @Value("${api.security.token.secret-key}")
     private String secretKey;
+    @Value("${api.security.token.expiration-hours}")
+    private long expirationHours;
 
     private final String ISSUER = "controla-preju-api";
 
@@ -35,7 +37,7 @@ public class TokenService {
                     .withExpiresAt(this.setExpirationTime())
                     .sign(algorithm);
         } catch (JWTCreationException exception){
-            throw new RuntimeException("Error generating token. Exception message: " + exception.getMessage());
+            throw new RuntimeException("Erro gerando token. Mensagem da exceção: " + exception.getMessage());
         }
     }
 
@@ -48,12 +50,14 @@ public class TokenService {
                     .verify(token)
                     .getSubject();
         } catch (JWTVerificationException exception){
-            throw new RuntimeException("Error validating token. Exception message: " + exception.getMessage());
+            return null;
         }
     }
 
     private Instant setExpirationTime(){
-        return LocalDateTime.now().plusWeeks(1).toInstant(ZoneOffset.of("-03:00"));
+        return LocalDateTime.now()
+                .plusHours(expirationHours)
+                .toInstant(ZoneOffset.of("-03:00"));
     }
 
 }

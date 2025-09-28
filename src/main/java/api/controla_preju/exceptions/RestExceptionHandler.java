@@ -16,7 +16,7 @@ import java.util.List;
 public class RestExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<DefaultErrorResponse> handleBusinessException(BusinessException exception, HttpServletRequest request) {
+    private ResponseEntity<DefaultErrorResponse> handleBusinessException(BusinessException exception, HttpServletRequest request) {
         DefaultErrorResponse response = new DefaultErrorResponse(
                 Instant.now(),
                 HttpStatus.BAD_REQUEST.value(),
@@ -27,7 +27,7 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ValidationErrorResponse> handleValidationException(MethodArgumentNotValidException exception, HttpServletRequest request) {
+    private ResponseEntity<ValidationErrorResponse> handleValidationException(MethodArgumentNotValidException exception, HttpServletRequest request) {
         List<ValidationErrorResponse.FieldError> errors = exception.getBindingResult().getFieldErrors().stream()
                 .map(fieldError -> new ValidationErrorResponse.FieldError(fieldError.getField(), fieldError.getDefaultMessage()))
                 .toList();
@@ -39,6 +39,18 @@ public class RestExceptionHandler {
                 errors
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(PasswordOrEmailInvalidException.class)
+    private ResponseEntity<DefaultErrorResponse> handlerPasswordOrEmailException(PasswordOrEmailInvalidException exception,
+                                                                                 HttpServletRequest request){
+        DefaultErrorResponse response = new DefaultErrorResponse(
+                Instant.now(),
+                HttpStatus.UNAUTHORIZED.value(),
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
 }
