@@ -1,0 +1,39 @@
+package api.controla_preju.services;
+
+import api.controla_preju.dtos.forms.CreateUserForm;
+import api.controla_preju.entities.User;
+import api.controla_preju.exceptions.BusinessException;
+import api.controla_preju.repositories.UserRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Service
+public class UserService {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Transactional
+    public User create(CreateUserForm form){
+        if (userRepository.existsByEmail(form.email())) {
+            throw new BusinessException("Este e-mail já está em uso.");
+        }
+
+        String encryptedPassword = passwordEncoder.encode(form.password());
+
+        User newUser = new User(
+                form.email(),
+                form.name(),
+                encryptedPassword
+        );
+
+        return userRepository.save(newUser);
+    }
+
+}

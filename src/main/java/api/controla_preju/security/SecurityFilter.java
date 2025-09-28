@@ -1,5 +1,8 @@
 package api.controla_preju.security;
 
+import api.controla_preju.entities.User;
+import api.controla_preju.repositories.UserRepository;
+import api.controla_preju.services.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
