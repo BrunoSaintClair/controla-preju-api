@@ -4,6 +4,9 @@ import api.controla_preju.entities.User;
 import api.controla_preju.repositories.jpa.UserJpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+import java.util.UUID;
+
 @Repository
 public class UserRepository {
 
@@ -15,6 +18,10 @@ public class UserRepository {
 
     public User findByEmail(String email){
         return jpaRepository.findByEmail(email);
+    }
+
+    public Optional<User> findById(UUID id){
+        return jpaRepository.findById(id);
     }
 
     public boolean existsByEmail(String email){

@@ -5,6 +5,7 @@ import api.controla_preju.entities.User;
 import api.controla_preju.repositories.jpa.AccountJpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,6 +24,10 @@ public class AccountRepository {
 
     public boolean existsByNameAndUser(String name, User user) {
         return jpaRepository.existsByNameAndUser(name, user);
+    }
+
+    public List<Account> findAllByUser(User user) {
+        return jpaRepository.findAllByUser(user);
     }
 
     public Optional<Account> findById(UUID accountId){

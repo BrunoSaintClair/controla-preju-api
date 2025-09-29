@@ -11,7 +11,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/accounts")
@@ -35,9 +37,25 @@ public class AccountController {
         return ResponseEntity.created(location).body(response);
     }
 
+    @GetMapping
+    public ResponseEntity<List<AccountDetailsView>> getAllByUser(@AuthenticationPrincipal(expression = "id") UUID userId){
+        List<AccountDetailsView> accounts = accountService.findAllByUserId(userId).stream()
+                .map(account -> new AccountDetailsView(
+                        account.getId(),
+                        account.getName(),
+                        account.getDescription(),
+                        account.getType(),
+                        account.getBalanceInCents(),
+                        account.getCreatedAt()
+                ))
+                .collect(Collectors.toList());
+        if (accounts.isEmpty()) return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(accounts);
+    }
+
     @GetMapping("/{accountId}")
     public ResponseEntity<AccountDetailsView> getById(@PathVariable UUID accountId,
-                                           @AuthenticationPrincipal(expression = "id") UUID userId){
+                                                      @AuthenticationPrincipal(expression = "id") UUID userId){
         var account = accountService.findById(accountId, userId);
         var response = new AccountDetailsView(
                 account.getId(), account.getName(), account.getDescription(), account.getType(),

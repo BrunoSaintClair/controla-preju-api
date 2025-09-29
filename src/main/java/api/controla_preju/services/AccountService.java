@@ -6,10 +6,12 @@ import api.controla_preju.entities.User;
 import api.controla_preju.exceptions.AuthorizationException;
 import api.controla_preju.exceptions.BusinessException;
 import api.controla_preju.repositories.AccountRepository;
+import api.controla_preju.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -17,9 +19,11 @@ import java.util.UUID;
 public class AccountService {
 
     private final AccountRepository accountRepository;
+    private final UserRepository userRepository;
 
-    public AccountService(AccountRepository accountRepository) {
+    public AccountService(AccountRepository accountRepository, UserRepository userRepository) {
         this.accountRepository = accountRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional
@@ -34,6 +38,12 @@ public class AccountService {
                 owner
         );
         return accountRepository.save(newAccount);
+    }
+
+    public List<Account> findAllByUserId(UUID userId) {
+        Optional<User> optional = userRepository.findById(userId);
+        if (optional.isEmpty()) throw new EntityNotFoundException("Usuário não encontrado");
+        return accountRepository.findAllByUser(optional.get());
     }
 
     public Account findById(UUID accountId, UUID userId) {
