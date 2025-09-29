@@ -1,6 +1,7 @@
 package api.controla_preju.controllers;
 
 import api.controla_preju.dtos.forms.CreateAccountForm;
+import api.controla_preju.dtos.views.AccountDetailsView;
 import api.controla_preju.dtos.views.CreatedAccountView;
 import api.controla_preju.entities.User;
 import api.controla_preju.services.AccountService;
@@ -10,6 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/accounts")
@@ -31,6 +33,17 @@ public class AccountController {
         );
         URI location = URI.create("/accounts/" + newAccount.getId());
         return ResponseEntity.created(location).body(response);
+    }
+
+    @GetMapping("/{accountId}")
+    public ResponseEntity<AccountDetailsView> getById(@PathVariable UUID accountId,
+                                           @AuthenticationPrincipal(expression = "id") UUID userId){
+        var account = accountService.findById(accountId, userId);
+        var response = new AccountDetailsView(
+                account.getId(), account.getName(), account.getDescription(), account.getType(),
+                account.getBalanceInCents(), account.getCreatedAt()
+        );
+        return ResponseEntity.ok(response);
     }
 
 }
