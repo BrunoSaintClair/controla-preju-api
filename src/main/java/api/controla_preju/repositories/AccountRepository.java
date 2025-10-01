@@ -34,4 +34,8 @@ public class AccountRepository {
         return jpaRepository.findById(accountId);
     }
 
+    public void delete(Account account) {
+        jpaRepository.delete(account);
+    }
+
 }

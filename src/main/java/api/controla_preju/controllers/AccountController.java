@@ -64,4 +64,12 @@ public class AccountController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/{accountId}")
+    public ResponseEntity<Void> delete(@PathVariable UUID accountId,
+                                       @AuthenticationPrincipal(expression = "id") UUID userId){
+        var account = accountService.findById(accountId, userId);
+        accountService.delete(account);
+        return ResponseEntity.noContent().build();
+    }
+
 }

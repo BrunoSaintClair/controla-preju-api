@@ -61,4 +61,8 @@ public class AccountService {
         return entity;
     }
 
+    public void delete(Account account) {
+        accountRepository.delete(account);
+    }
+
 }
