@@ -10,4 +10,5 @@ import java.util.UUID;
 public interface AccountJpaRepository extends JpaRepository<Account, UUID>  {
     boolean existsByNameAndUser(String name, User user);
     List<Account> findAllByUser(User user);
+    int countByUser(User user);
 }

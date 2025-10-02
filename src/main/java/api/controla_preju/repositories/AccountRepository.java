@@ -38,4 +38,8 @@ public class AccountRepository {
         jpaRepository.delete(account);
     }
 
+    public int countByUser(User user){
+        return jpaRepository.countByUser(user);
+    }
+
 }

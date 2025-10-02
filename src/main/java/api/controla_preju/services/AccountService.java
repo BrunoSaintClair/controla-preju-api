@@ -35,6 +35,10 @@ public class AccountService {
         if (accountRepository.existsByNameAndUser(form.name(), owner)) {
             throw new BusinessException("O usuário já possui uma conta com este nome.");
         }
+        if (accountRepository.countByUser(owner) >= maxAccountsPerUser){
+            throw new BusinessException("O usuário atingiu o limite de quantidade de contas.");
+        }
+
         Account newAccount = new Account(
                 form.name(),
                 form.description(),
