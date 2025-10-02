@@ -20,9 +20,10 @@ public class TokenService {
     @Value("${api.security.token.secret-key}")
     private String secretKey;
     @Value("${api.security.token.expiration-hours}")
-    private long expirationHours;
+    private int expirationHours;
+    @Value("${api.token.jwt.issuer}")
+    private String ISSUER;
 
-    private final String ISSUER = "controla-preju-api";
 
     public String generateToken(User user){
         try {

@@ -9,6 +9,7 @@ import api.controla_preju.exceptions.BusinessException;
 import api.controla_preju.repositories.AccountRepository;
 import api.controla_preju.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,8 @@ public class AccountService {
 
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
+    @Value("${api.max-accounts-per-user}")
+    private int maxAccountsPerUser;
 
     public AccountService(AccountRepository accountRepository, UserRepository userRepository) {
         this.accountRepository = accountRepository;
