@@ -41,4 +41,16 @@ public class Account {
         this.user = user;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setType(AccountType type) {
+        this.type = type;
+    }
+
 }

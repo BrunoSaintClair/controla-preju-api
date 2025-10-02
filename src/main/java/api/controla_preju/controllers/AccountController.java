@@ -1,6 +1,7 @@
 package api.controla_preju.controllers;
 
 import api.controla_preju.dtos.forms.CreateAccountForm;
+import api.controla_preju.dtos.forms.UpdateAccountForm;
 import api.controla_preju.dtos.views.AccountDetailsView;
 import api.controla_preju.dtos.views.CreatedAccountView;
 import api.controla_preju.entities.User;
@@ -70,6 +71,23 @@ public class AccountController {
         var account = accountService.findById(accountId, userId);
         accountService.delete(account);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{accountId}")
+    public ResponseEntity<AccountDetailsView> update(@PathVariable UUID accountId,
+                                                     @Valid @RequestBody UpdateAccountForm form,
+                                                     @AuthenticationPrincipal(expression = "id") UUID userId){
+        var oldAccount = accountService.findById(accountId, userId);
+        var updatedAccount = accountService.update(oldAccount, form);
+        var response = new AccountDetailsView(
+                updatedAccount.getId(),
+                updatedAccount.getName(),
+                updatedAccount.getDescription(),
+                updatedAccount.getType(),
+                updatedAccount.getBalanceInCents(),
+                updatedAccount.getCreatedAt()
+        );
+        return ResponseEntity.ok(response);
     }
 
 }

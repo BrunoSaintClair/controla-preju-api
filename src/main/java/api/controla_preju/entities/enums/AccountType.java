@@ -6,7 +6,7 @@ import lombok.Getter;
 public enum AccountType {
     CONTA_CORRENTE("Conta corrente"),
     INVESTIMENTOS("Investimentos"),
-    POUPANÇA("Poupança"),
+    POUPANCA("Poupança"),
     CARTEIRA("Carteira");
 
     private final String description;

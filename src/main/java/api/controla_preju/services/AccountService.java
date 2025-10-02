@@ -1,6 +1,7 @@
 package api.controla_preju.services;
 
 import api.controla_preju.dtos.forms.CreateAccountForm;
+import api.controla_preju.dtos.forms.UpdateAccountForm;
 import api.controla_preju.entities.Account;
 import api.controla_preju.entities.User;
 import api.controla_preju.exceptions.AuthorizationException;
@@ -63,6 +64,14 @@ public class AccountService {
 
     public void delete(Account account) {
         accountRepository.delete(account);
+    }
+
+    public Account update(Account account, UpdateAccountForm form){
+        if (form.name() != null) account.setName(form.name());
+        if (form.description() != null) account.setDescription(form.description());
+        if (form.type() != null) account.setType(form.type());
+
+        return accountRepository.save(account);
     }
 
 }
