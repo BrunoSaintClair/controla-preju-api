@@ -12,7 +12,7 @@ public record CreateUserForm(
 
         @NotBlank(message = "O nome não pode ser vazio.")
         @Size(min = 4, message = "O nome deve conter pelo menos 4 caracteres.")
-        @Size(max = 100, message = "O nome deve conter no máximo 100 caracteres.")
+        @Size(max = 30, message = "O nome deve conter no máximo 30 caracteres.")
         String name,
 
         @NotBlank(message = "A senha não pode ser vazia.")

@@ -1,4 +1,6 @@
 package api.controla_preju.dtos.views;
 
-public record LoginView(String token, String tokenType) {
+import java.util.UUID;
+
+public record LoginView(UUID userId, String userName, String tokenType, String token) {
 }

@@ -33,8 +33,9 @@ public class AuthController {
         var emailAndPassword = new UsernamePasswordAuthenticationToken(form.email(), form.password());
         try {
             var auth = authenticationManager.authenticate(emailAndPassword);
+            var user = (User) auth.getPrincipal();
             var token = tokenService.generateToken((User) auth.getPrincipal());
-            return ResponseEntity.ok(new LoginView(token, "Bearer"));
+            return ResponseEntity.ok(new LoginView(user.getId(), user.getName(), "Bearer", token));
         } catch (BadCredentialsException | InternalAuthenticationServiceException e) {
             throw new PasswordOrEmailInvalidException("Email e/ou senha inválidos.");
         }

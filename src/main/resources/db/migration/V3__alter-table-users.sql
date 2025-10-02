@@ -1,0 +1,2 @@
+ALTER TABLE users
+    ALTER COLUMN name TYPE VARCHAR (30) USING (name :: VARCHAR (30));
