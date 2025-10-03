@@ -47,6 +47,7 @@ public class AccountController {
                         account.getDescription(),
                         account.getType(),
                         account.getBalanceInCents(),
+                        account.getUpdatedAt(),
                         account.getCreatedAt()
                 ))
                 .collect(Collectors.toList());
@@ -60,7 +61,7 @@ public class AccountController {
         var account = accountService.findById(accountId, userId);
         var response = new AccountDetailsView(
                 account.getId(), account.getName(), account.getDescription(), account.getType(),
-                account.getBalanceInCents(), account.getCreatedAt()
+                account.getBalanceInCents(), account.getUpdatedAt(), account.getCreatedAt()
         );
         return ResponseEntity.ok(response);
     }
@@ -85,6 +86,7 @@ public class AccountController {
                 updatedAccount.getDescription(),
                 updatedAccount.getType(),
                 updatedAccount.getBalanceInCents(),
+                updatedAccount.getUpdatedAt(),
                 updatedAccount.getCreatedAt()
         );
         return ResponseEntity.ok(response);

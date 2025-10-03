@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -27,6 +28,9 @@ public class Account {
     private AccountType type;
     @Column(nullable = false)
     private long balanceInCents;
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
     @Column(nullable = false)
     private LocalDateTime createdAt;
     @ManyToOne

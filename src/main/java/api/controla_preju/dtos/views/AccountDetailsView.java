@@ -6,5 +6,6 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record AccountDetailsView(UUID id, String name, String description,
-                                 AccountType type, long balanceInCents, LocalDateTime createdAt) {
+                                 AccountType type, long balanceInCents,
+                                 LocalDateTime updatedAt, LocalDateTime createdAt) {
 }
