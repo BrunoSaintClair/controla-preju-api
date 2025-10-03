@@ -2,13 +2,12 @@ package api.controla_preju.controllers;
 
 import api.controla_preju.dtos.forms.CreateUserForm;
 import api.controla_preju.dtos.views.CreatedUserView;
+import api.controla_preju.entities.User;
 import api.controla_preju.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 
@@ -28,6 +27,18 @@ public class UserController {
         var response = new CreatedUserView(newUser);
         URI location = URI.create("/users/" + newUser.getId());
         return ResponseEntity.created(location).body(response);
+    }
+
+    @DeleteMapping("/deactivate")
+    public ResponseEntity<Void> deactivate(@AuthenticationPrincipal User user) {
+        userService.deactivate(user);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/reactivate")
+    public ResponseEntity<Void> reactivate(@AuthenticationPrincipal User user) {
+        userService.reactivate(user);
+        return ResponseEntity.ok().build();
     }
 
 }

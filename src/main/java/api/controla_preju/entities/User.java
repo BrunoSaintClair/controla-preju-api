@@ -80,4 +80,8 @@ public class User implements UserDetails {
         return this.status == 'A';
     }
 
+    public void setStatus(Character status) {
+        this.status = status;
+    }
+
 }

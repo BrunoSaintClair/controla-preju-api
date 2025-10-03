@@ -40,19 +40,12 @@ public class SecurityFilter extends OncePerRequestFilter {
         var token = this.recoverToken(request);
 
         if (token != null) {
-            if (!fixedDevToken.isEmpty() && fixedDevToken.equals(token)) {
-                var authentication = new UsernamePasswordAuthenticationToken(
-                        "dev-user", null, Collections.emptyList()
-                );
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            } else {
-                var email = tokenService.validateToken(token);
-                if (email != null) {
-                    User user = userRepository.findByEmail(email);
-                    if (user != null) {
-                        var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-                        SecurityContextHolder.getContext().setAuthentication(authentication);
-                    }
+            var email = tokenService.validateToken(token);
+            if (email != null) {
+                User user = userRepository.findByEmail(email);
+                if (user != null) {
+                    var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }
         }

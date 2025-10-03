@@ -36,4 +36,16 @@ public class UserService {
         return userRepository.save(newUser);
     }
 
+    @Transactional
+    public void deactivate(User user) {
+        user.setStatus('I');
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void reactivate(User user) {
+        user.setStatus('A');
+        userRepository.save(user);
+    }
+
 }
