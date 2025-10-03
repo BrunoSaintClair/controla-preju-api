@@ -49,9 +49,8 @@ public class AccountService {
     }
 
     public List<Account> findAllByUserId(UUID userId) {
-        Optional<User> optional = userRepository.findById(userId);
-        if (optional.isEmpty()) throw new EntityNotFoundException("Usuário não encontrado");
-        return accountRepository.findAllByUser(optional.get());
+        User user = userRepository.findById(userId);
+        return accountRepository.findAllByUser(user);
     }
 
     public Account findById(UUID accountId, UUID userId) {

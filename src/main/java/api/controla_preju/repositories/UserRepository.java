@@ -1,7 +1,9 @@
 package api.controla_preju.repositories;
 
 import api.controla_preju.entities.User;
+import api.controla_preju.exceptions.BusinessException;
 import api.controla_preju.repositories.jpa.UserJpaRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -16,12 +18,23 @@ public class UserRepository {
         this.jpaRepository = jpaRepository;
     }
 
-    public User findByEmail(String email){
-        return jpaRepository.findByEmail(email);
+    private User validateUser(Optional<User> optionalUser) {
+        if (optionalUser.isEmpty()) {
+            throw new EntityNotFoundException("Usuário não encontrado.");
+        }
+        User user = optionalUser.get();
+        if (!user.isEnabled()) {
+            throw new BusinessException("Usuário com a conta desativada.");
+        }
+        return user;
     }
 
-    public Optional<User> findById(UUID id){
-        return jpaRepository.findById(id);
+    public User findByEmail(String email){
+        return validateUser(jpaRepository.findByEmail(email));
+    }
+
+    public User findById(UUID id){
+        return validateUser(jpaRepository.findById(id));
     }
 
     public boolean existsByEmail(String email){
