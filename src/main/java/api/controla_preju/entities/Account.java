@@ -28,6 +28,8 @@ public class Account {
     private AccountType type;
     @Column(nullable = false)
     private long balanceInCents;
+    @Column(nullable = false)
+    private boolean canChangeBalance;
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
@@ -36,11 +38,12 @@ public class Account {
     @ManyToOne
     private User user;
 
-    public Account(String name, String description, AccountType type, User user) {
+    public Account(String name, String description, AccountType type, long balanceInCents, boolean canChangeBalance, User user) {
         this.name = name;
         this.description = description;
         this.type = type;
-        this.balanceInCents = 0;
+        this.balanceInCents = balanceInCents;
+        this.canChangeBalance = canChangeBalance;
         this.createdAt = LocalDateTime.now();
         this.user = user;
     }
@@ -55,6 +58,14 @@ public class Account {
 
     public void setType(AccountType type) {
         this.type = type;
+    }
+
+    public void setBalanceInCents(long balanceInCents) {
+        this.balanceInCents = balanceInCents;
+    }
+
+    public void setCanChangeBalance(boolean canChangeBalance) {
+        this.canChangeBalance = canChangeBalance;
     }
 
 }
