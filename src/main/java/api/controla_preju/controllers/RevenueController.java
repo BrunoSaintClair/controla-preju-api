@@ -2,6 +2,8 @@ package api.controla_preju.controllers;
 
 import api.controla_preju.dtos.forms.CreateRevenueForm;
 import api.controla_preju.dtos.views.CreatedRevenueView;
+import api.controla_preju.dtos.views.RevenueDetailsView;
+import api.controla_preju.entities.Revenue;
 import api.controla_preju.entities.User;
 import api.controla_preju.services.RevenueService;
 import jakarta.validation.Valid;
@@ -37,6 +39,14 @@ public class RevenueController {
         var revenue = revenueService.findById(revenueId, userId);
         revenueService.delete(revenue);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{revenueId}")
+    public ResponseEntity<RevenueDetailsView> getById(@PathVariable UUID revenueId,
+                                          @AuthenticationPrincipal(expression = "id") UUID userId) {
+        var revenue = revenueService.findById(revenueId, userId);
+        var response = new RevenueDetailsView(revenue);
+        return ResponseEntity.ok(response);
     }
 
 }
