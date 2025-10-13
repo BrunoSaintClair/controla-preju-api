@@ -3,7 +3,6 @@ package api.controla_preju.controllers;
 import api.controla_preju.dtos.forms.CreateRevenueForm;
 import api.controla_preju.dtos.views.CreatedRevenueView;
 import api.controla_preju.dtos.views.RevenueDetailsView;
-import api.controla_preju.entities.Revenue;
 import api.controla_preju.entities.User;
 import api.controla_preju.services.RevenueService;
 import jakarta.validation.Valid;

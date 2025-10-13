@@ -4,6 +4,7 @@ import api.controla_preju.entities.Revenue;
 import api.controla_preju.repositories.jpa.RevenueJpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,6 +27,10 @@ public class RevenueRepository {
 
     public void delete(Revenue revenue) {
         revenueJpaRepository.delete(revenue);
+    }
+
+    public List<Revenue> findAllByAccountId(UUID accountId) {
+        return revenueJpaRepository.findAllByAccountId(accountId);
     }
 
 }

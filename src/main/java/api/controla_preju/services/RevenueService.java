@@ -10,6 +10,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -61,6 +62,11 @@ public class RevenueService {
         Account account = revenue.getAccount();
         account.setBalanceInCents(account.getBalanceInCents() - revenue.getAmountInCents());
         revenueRepository.delete(revenue);
+    }
+
+    public List<Revenue> findAllByAccountId(UUID accountId, UUID userId) {
+        accountService.findById(accountId, userId);
+        return revenueRepository.findAllByAccountId(accountId);
     }
 
 }
