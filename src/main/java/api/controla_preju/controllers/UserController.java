@@ -2,6 +2,7 @@ package api.controla_preju.controllers;
 
 import api.controla_preju.dtos.forms.CreateUserForm;
 import api.controla_preju.dtos.views.CreatedUserView;
+import api.controla_preju.dtos.views.UserDetailsView;
 import api.controla_preju.entities.User;
 import api.controla_preju.services.UserService;
 import jakarta.validation.Valid;
@@ -10,6 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/users")
@@ -39,6 +41,13 @@ public class UserController {
     public ResponseEntity<Void> reactivate(@AuthenticationPrincipal User user) {
         userService.reactivate(user);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<UserDetailsView> getById(@AuthenticationPrincipal(expression = "id") UUID id){
+        var user = userService.findById(id);
+        var response = new UserDetailsView(user);
+        return ResponseEntity.ok(response);
     }
 
 }
