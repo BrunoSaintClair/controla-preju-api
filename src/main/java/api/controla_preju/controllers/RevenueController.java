@@ -10,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/revenues")
@@ -28,6 +29,14 @@ public class RevenueController {
         var response = new CreatedRevenueView(newRevenue);
         URI location = URI.create("/revenues/" + newRevenue.getId());
         return ResponseEntity.created(location).body(response);
+    }
+
+    @DeleteMapping("/{revenueId}")
+    public ResponseEntity<Void> delete(@PathVariable UUID revenueId,
+                                       @AuthenticationPrincipal(expression = "id") UUID userId) {
+        var revenue = revenueService.findById(revenueId, userId);
+        revenueService.delete(revenue);
+        return ResponseEntity.noContent().build();
     }
 
 }
