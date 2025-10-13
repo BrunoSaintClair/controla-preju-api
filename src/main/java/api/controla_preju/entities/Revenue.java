@@ -41,4 +41,24 @@ public class Revenue {
         this.account = account;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setAmountInCents(long amountInCents) {
+        this.amountInCents = amountInCents;
+    }
+
+    public void setCategory(RevenueCategory category) {
+        this.category = category;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
 }

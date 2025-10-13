@@ -1,10 +1,12 @@
 package api.controla_preju.services;
 
 import api.controla_preju.dtos.forms.CreateRevenueForm;
+import api.controla_preju.dtos.forms.UpdateRevenueForm;
 import api.controla_preju.entities.Account;
 import api.controla_preju.entities.Revenue;
 import api.controla_preju.entities.User;
 import api.controla_preju.exceptions.AuthorizationException;
+import api.controla_preju.exceptions.BusinessException;
 import api.controla_preju.repositories.RevenueRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
@@ -67,6 +69,24 @@ public class RevenueService {
     public List<Revenue> findAllByAccountId(UUID accountId, UUID userId) {
         accountService.findById(accountId, userId);
         return revenueRepository.findAllByAccountId(accountId);
+    }
+
+    @Transactional
+    public Revenue update(Revenue revenue, UpdateRevenueForm form) {
+        Account account = revenue.getAccount();
+        long oldAmount = revenue.getAmountInCents();
+
+        if (form.title() != null) revenue.setTitle(form.title());
+        if (form.description() != null) revenue.setDescription(form.description());
+        if (form.category() != null) revenue.setCategory(form.category());
+        if (form.createdAt() != null) revenue.setCreatedAt(form.createdAt());
+        if (form.amountInCents() != null) revenue.setAmountInCents(form.amountInCents());
+
+        long newAmount = revenue.getAmountInCents();
+        long difference = newAmount - oldAmount;
+        account.setBalanceInCents(account.getBalanceInCents() + difference);
+
+        return revenueRepository.save(revenue);
     }
 
 }

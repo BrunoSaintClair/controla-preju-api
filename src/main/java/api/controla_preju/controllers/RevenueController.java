@@ -1,6 +1,7 @@
 package api.controla_preju.controllers;
 
 import api.controla_preju.dtos.forms.CreateRevenueForm;
+import api.controla_preju.dtos.forms.UpdateRevenueForm;
 import api.controla_preju.dtos.views.CreatedRevenueView;
 import api.controla_preju.dtos.views.RevenueDetailsView;
 import api.controla_preju.entities.User;
@@ -42,9 +43,19 @@ public class RevenueController {
 
     @GetMapping("/{revenueId}")
     public ResponseEntity<RevenueDetailsView> getById(@PathVariable UUID revenueId,
-                                          @AuthenticationPrincipal(expression = "id") UUID userId) {
+                                                      @AuthenticationPrincipal(expression = "id") UUID userId) {
         var revenue = revenueService.findById(revenueId, userId);
         var response = new RevenueDetailsView(revenue);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{revenueId}")
+    public ResponseEntity<RevenueDetailsView> update(@PathVariable UUID revenueId,
+                                                     @Valid @RequestBody UpdateRevenueForm form,
+                                                     @AuthenticationPrincipal(expression = "id") UUID userId) {
+        var revenue = revenueService.findById(revenueId, userId);
+        var updatedRevenue = revenueService.update(revenue, form);
+        var response = new RevenueDetailsView(updatedRevenue);
         return ResponseEntity.ok(response);
     }
 
