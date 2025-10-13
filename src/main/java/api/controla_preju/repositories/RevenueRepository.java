@@ -33,4 +33,12 @@ public class RevenueRepository {
         return revenueJpaRepository.findAllByAccountId(accountId);
     }
 
+    public List<Revenue> findAllByAccountIdAndYearAndMonth(UUID accountId, int year, int month) {
+        return revenueJpaRepository.findAllByAccountIdAndYearAndMonth(accountId, year, month);
+    }
+
+    public List<Revenue> findAllByAccountIdAndYearAndMonthAndDay(UUID accountId, int year, int month, int day) {
+        return revenueJpaRepository.findAllByAccountIdAndYearAndMonthAndDay(accountId, year, month, day);
+    }
+
 }

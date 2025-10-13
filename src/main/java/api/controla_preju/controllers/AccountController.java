@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -98,18 +99,18 @@ public class AccountController {
     }
 
     @GetMapping("/{accountId}/revenues")
-    public ResponseEntity<List<RevenueDetailsView>> getAllRevenuesByAccount(@PathVariable UUID accountId,
-                                                                            @AuthenticationPrincipal(expression = "id") UUID userId) {
-        List<RevenueDetailsView> revenues = revenueService.
-                findAllByAccountId(accountId, userId)
+    public ResponseEntity<List<RevenueDetailsView>> getRevenuesByAccount(
+                                                            @PathVariable UUID accountId,
+                                                            @RequestParam(required = false) Optional<Integer> year,
+                                                            @RequestParam(required = false) Optional<Integer> month,
+                                                            @RequestParam(required = false) Optional<Integer> day,
+                                                            @AuthenticationPrincipal(expression = "id") UUID userId) {
+        List<RevenueDetailsView> revenues = revenueService
+                .findRevenuesByAccount(accountId, userId, year, month, day)
                 .stream()
                 .map(RevenueDetailsView::new)
                 .collect(Collectors.toList());
-
-        if (revenues.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-
+        if (revenues.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(revenues);
     }
 

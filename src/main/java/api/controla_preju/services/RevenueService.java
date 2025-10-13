@@ -89,4 +89,21 @@ public class RevenueService {
         return revenueRepository.save(revenue);
     }
 
+    public List<Revenue> findRevenuesByAccount(UUID accountId, UUID userId,
+                                               Optional<Integer> year, Optional<Integer> month,
+                                               Optional<Integer> day) {
+        accountService.findById(accountId, userId);
+        if (year.isPresent() && month.isPresent() && day.isPresent()) {
+            return revenueRepository.findAllByAccountIdAndYearAndMonthAndDay(accountId, year.get(), month.get(), day.get());
+        }
+        if (year.isPresent() && month.isPresent()) {
+            return revenueRepository.findAllByAccountIdAndYearAndMonth(accountId, year.get(), month.get());
+        }
+        if (year.isEmpty() && month.isEmpty() && day.isEmpty()) {
+            return revenueRepository.findAllByAccountId(accountId);
+        }
+        throw new BusinessException("Combinação de filtros inválida.");
+    }
+
+
 }
