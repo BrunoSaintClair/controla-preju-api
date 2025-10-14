@@ -2,6 +2,7 @@ package api.controla_preju.controllers;
 
 import api.controla_preju.dtos.forms.CreateExpenseForm;
 import api.controla_preju.dtos.views.CreatedExpenseView;
+import api.controla_preju.dtos.views.ExpenseDetailsView;
 import api.controla_preju.entities.User;
 import api.controla_preju.services.ExpenseService;
 import jakarta.validation.Valid;
@@ -37,6 +38,14 @@ public class ExpenseController {
         var expense = expensesService.findById(expenseId, userId);
         expensesService.delete(expense);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{expenseId}")
+    public ResponseEntity<ExpenseDetailsView> getById(@PathVariable UUID expenseId,
+                                                      @AuthenticationPrincipal(expression = "id") UUID userId) {
+        var expense = expensesService.findById(expenseId, userId);
+        var response = new ExpenseDetailsView(expense);
+        return ResponseEntity.ok(response);
     }
 
 }
