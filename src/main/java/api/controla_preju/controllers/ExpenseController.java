@@ -7,12 +7,10 @@ import api.controla_preju.services.ExpenseService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/expenses")
@@ -31,6 +29,14 @@ public class ExpenseController {
         var response = new CreatedExpenseView(newExpense);
         URI location = URI.create("/expenses/" + newExpense.getId());
         return ResponseEntity.created(location).body(response);
+    }
+
+    @DeleteMapping("/{expenseId}")
+    public ResponseEntity<Void> delete(@PathVariable UUID expenseId,
+                                       @AuthenticationPrincipal(expression = "id") UUID userId) {
+        var expense = expensesService.findById(expenseId, userId);
+        expensesService.delete(expense);
+        return ResponseEntity.noContent().build();
     }
 
 }
