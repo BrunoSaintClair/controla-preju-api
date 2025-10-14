@@ -1,6 +1,7 @@
 package api.controla_preju.entities;
 
 import api.controla_preju.entities.enums.ExpenseCategory;
+import api.controla_preju.entities.enums.PaymentMethod;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,17 +26,21 @@ public class Expense {
     private long amountInCents;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
+    private PaymentMethod paymentMethod;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
     private ExpenseCategory category;
     @Column(nullable = false)
     private LocalDateTime createdAt;
     @ManyToOne
     private Account account;
 
-    public Expense(String title, String description, long amountInCents, ExpenseCategory category,
-                   LocalDateTime createdAt, Account account) {
+    public Expense(String title, String description, long amountInCents, PaymentMethod paymentMethod,
+                   ExpenseCategory category, LocalDateTime createdAt, Account account) {
         this.title = title;
         this.description = description;
         this.amountInCents = amountInCents;
+        this.paymentMethod = paymentMethod;
         this.category = category;
         this.createdAt = createdAt;
         this.account = account;

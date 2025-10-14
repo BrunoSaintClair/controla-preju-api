@@ -14,6 +14,8 @@ public enum ExpenseCategory {
     ROUPAS("Roupas"),
     APARENCIA("Aparência"),
     TECNOLOGIA("Tecnologia"),
+    STREAMING("Streaming"),
+    SERVICOS("Serviços"),
     DIVIDAS("Dívidas");
 
     private final String description;
