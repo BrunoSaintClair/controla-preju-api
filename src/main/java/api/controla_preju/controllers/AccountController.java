@@ -6,9 +6,11 @@ import api.controla_preju.dtos.forms.UpdateBalanceForm;
 import api.controla_preju.dtos.forms.UpdateCanChangeBalanceForm;
 import api.controla_preju.dtos.views.AccountDetailsView;
 import api.controla_preju.dtos.views.CreatedAccountView;
+import api.controla_preju.dtos.views.ExpenseDetailsView;
 import api.controla_preju.dtos.views.RevenueDetailsView;
 import api.controla_preju.entities.User;
 import api.controla_preju.services.AccountService;
+import api.controla_preju.services.ExpenseService;
 import api.controla_preju.services.RevenueService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -27,10 +29,12 @@ public class AccountController {
 
     private final AccountService accountService;
     private final RevenueService revenueService;
+    private final ExpenseService expenseService;
 
-    public AccountController(AccountService accountService, RevenueService revenueService) {
+    public AccountController(AccountService accountService, RevenueService revenueService, ExpenseService expenseService) {
         this.accountService = accountService;
         this.revenueService = revenueService;
+        this.expenseService = expenseService;
     }
 
     @PostMapping
@@ -112,6 +116,22 @@ public class AccountController {
                 .collect(Collectors.toList());
         if (revenues.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(revenues);
+    }
+
+    @GetMapping("/{accountId}/expenses")
+    public ResponseEntity<List<ExpenseDetailsView>> getExpensesByAccount(
+                                                            @PathVariable UUID accountId,
+                                                            @RequestParam(required = false) Optional<Integer> year,
+                                                            @RequestParam(required = false) Optional<Integer> month,
+                                                            @RequestParam(required = false) Optional<Integer> day,
+                                                            @AuthenticationPrincipal(expression = "id") UUID userId) {
+        List<ExpenseDetailsView> expense = expenseService
+                .findExpensesByAccount(accountId, userId, year, month, day)
+                .stream()
+                .map(ExpenseDetailsView::new)
+                .collect(Collectors.toList());
+        if (expense.isEmpty()) return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(expense);
     }
 
 }

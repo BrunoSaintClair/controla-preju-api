@@ -6,12 +6,14 @@ import api.controla_preju.entities.Account;
 import api.controla_preju.entities.Expense;
 import api.controla_preju.entities.User;
 import api.controla_preju.exceptions.AuthorizationException;
+import api.controla_preju.exceptions.BusinessException;
 import api.controla_preju.repositories.ExpenseRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -79,6 +81,22 @@ public class ExpenseService {
         account.setBalanceInCents(account.getBalanceInCents() - difference);
 
         return expenseRepository.save(expense);
+    }
+
+    public List<Expense> findExpensesByAccount(UUID accountId, UUID userId,
+                                               Optional<Integer> year, Optional<Integer> month,
+                                               Optional<Integer> day) {
+        accountService.findById(accountId, userId);
+        if (year.isPresent() && month.isPresent() && day.isPresent()) {
+            return expenseRepository.findAllByAccountIdAndYearAndMonthAndDay(accountId, year.get(), month.get(), day.get());
+        }
+        if (year.isPresent() && month.isPresent()) {
+            return expenseRepository.findAllByAccountIdAndYearAndMonth(accountId, year.get(), month.get());
+        }
+        if (year.isEmpty() && month.isEmpty() && day.isEmpty()) {
+            return expenseRepository.findAllByAccountId(accountId);
+        }
+        throw new BusinessException("Combinação de filtros inválida.");
     }
 
 }
