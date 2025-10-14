@@ -10,5 +10,6 @@ public record UpdateAccountForm(
         @Size(max = 50, message = "A descrição da conta deve conter no máximo 50 caracteres.")
         String description,
 
-        AccountType type) {
+        AccountType type
+) {
 }

@@ -6,8 +6,10 @@ import api.controla_preju.dtos.forms.UpdateBalanceForm;
 import api.controla_preju.dtos.forms.UpdateCanChangeBalanceForm;
 import api.controla_preju.dtos.views.AccountDetailsView;
 import api.controla_preju.dtos.views.CreatedAccountView;
+import api.controla_preju.dtos.views.RevenueDetailsView;
 import api.controla_preju.entities.User;
 import api.controla_preju.services.AccountService;
+import api.controla_preju.services.RevenueService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -23,9 +26,11 @@ import java.util.stream.Collectors;
 public class AccountController {
 
     private final AccountService accountService;
+    private final RevenueService revenueService;
 
-    public AccountController(AccountService accountService) {
+    public AccountController(AccountService accountService, RevenueService revenueService) {
         this.accountService = accountService;
+        this.revenueService = revenueService;
     }
 
     @PostMapping
@@ -91,6 +96,22 @@ public class AccountController {
         var updatedAccount = accountService.updateCanChangeBalance(account, form);
         var response = new AccountDetailsView(updatedAccount);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{accountId}/revenues")
+    public ResponseEntity<List<RevenueDetailsView>> getRevenuesByAccount(
+                                                            @PathVariable UUID accountId,
+                                                            @RequestParam(required = false) Optional<Integer> year,
+                                                            @RequestParam(required = false) Optional<Integer> month,
+                                                            @RequestParam(required = false) Optional<Integer> day,
+                                                            @AuthenticationPrincipal(expression = "id") UUID userId) {
+        List<RevenueDetailsView> revenues = revenueService
+                .findRevenuesByAccount(accountId, userId, year, month, day)
+                .stream()
+                .map(RevenueDetailsView::new)
+                .collect(Collectors.toList());
+        if (revenues.isEmpty()) return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(revenues);
     }
 
 }
