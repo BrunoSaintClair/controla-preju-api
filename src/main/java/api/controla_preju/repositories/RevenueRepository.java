@@ -29,6 +29,10 @@ public class RevenueRepository {
         revenueJpaRepository.delete(revenue);
     }
 
+    public List<Revenue> findAllByUserId(UUID userId){
+        return revenueJpaRepository.findAllByUserId(userId);
+    }
+
     public List<Revenue> findAllByAccountId(UUID accountId) {
         return revenueJpaRepository.findAllByAccountId(accountId);
     }

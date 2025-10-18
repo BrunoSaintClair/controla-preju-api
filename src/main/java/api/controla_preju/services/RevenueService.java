@@ -84,6 +84,10 @@ public class RevenueService {
         return revenueRepository.save(revenue);
     }
 
+    public List<Revenue> findAllByUserId(UUID userId){
+        return revenueRepository.findAllByUserId(userId);
+    }
+
     public List<Revenue> findRevenuesByAccount(UUID accountId, UUID userId,
                                                Optional<Integer> year, Optional<Integer> month,
                                                Optional<Integer> day) {

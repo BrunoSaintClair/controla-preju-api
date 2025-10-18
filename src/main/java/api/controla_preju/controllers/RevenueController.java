@@ -12,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -31,6 +32,16 @@ public class RevenueController {
         var response = new CreatedRevenueView(newRevenue);
         URI location = URI.create("/revenues/" + newRevenue.getId());
         return ResponseEntity.created(location).body(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<RevenueDetailsView>> getAllByUser(@AuthenticationPrincipal(expression = "id") UUID userId){
+        var revenues = revenueService.findAllByUserId(userId)
+                .stream()
+                .map(RevenueDetailsView::new)
+                .toList();
+        if (revenues.isEmpty()) return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(revenues);
     }
 
     @DeleteMapping("/{revenueId}")
