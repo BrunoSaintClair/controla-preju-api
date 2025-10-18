@@ -29,6 +29,10 @@ public class ExpenseRepository {
         expenseJpaRepository.delete(expense);
     }
 
+    public List<Expense> findAllByUserId(UUID userId){
+        return expenseJpaRepository.findAllByUserId(userId);
+    }
+
     public List<Expense> findAllByAccountId(UUID accountId) {
         return expenseJpaRepository.findAllByAccountId(accountId);
     }

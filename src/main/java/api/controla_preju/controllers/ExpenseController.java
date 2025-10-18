@@ -4,7 +4,6 @@ import api.controla_preju.dtos.forms.CreateExpenseForm;
 import api.controla_preju.dtos.forms.UpdateExpenseForm;
 import api.controla_preju.dtos.views.CreatedExpenseView;
 import api.controla_preju.dtos.views.ExpenseDetailsView;
-import api.controla_preju.dtos.views.RevenueDetailsView;
 import api.controla_preju.entities.User;
 import api.controla_preju.services.ExpenseService;
 import jakarta.validation.Valid;
@@ -13,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -32,6 +32,16 @@ public class ExpenseController {
         var response = new CreatedExpenseView(newExpense);
         URI location = URI.create("/expenses/" + newExpense.getId());
         return ResponseEntity.created(location).body(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ExpenseDetailsView>> getAllByUser(@AuthenticationPrincipal(expression = "id") UUID userId){
+        var expenses = expenseService.findAllByUserId(userId)
+                .stream()
+                .map(ExpenseDetailsView::new)
+                .toList();
+        if (expenses.isEmpty()) return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(expenses);
     }
 
     @DeleteMapping("/{expenseId}")

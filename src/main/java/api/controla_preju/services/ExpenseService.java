@@ -83,6 +83,10 @@ public class ExpenseService {
         return expenseRepository.save(expense);
     }
 
+    public List<Expense> findAllByUserId(UUID userId){
+        return expenseRepository.findAllByUserId(userId);
+    }
+
     public List<Expense> findExpensesByAccount(UUID accountId, UUID userId,
                                                Optional<Integer> year, Optional<Integer> month,
                                                Optional<Integer> day) {
