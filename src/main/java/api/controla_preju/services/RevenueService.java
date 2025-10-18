@@ -66,11 +66,6 @@ public class RevenueService {
         revenueRepository.delete(revenue);
     }
 
-    public List<Revenue> findAllByAccountId(UUID accountId, UUID userId) {
-        accountService.findById(accountId, userId);
-        return revenueRepository.findAllByAccountId(accountId);
-    }
-
     @Transactional
     public Revenue update(Revenue revenue, UpdateRevenueForm form) {
         Account account = revenue.getAccount();

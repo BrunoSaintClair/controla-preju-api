@@ -72,10 +72,12 @@ public class AccountService {
         return entity;
     }
 
+    @Transactional
     public void delete(Account account) {
         accountRepository.delete(account);
     }
 
+    @Transactional
     public Account update(Account account, UpdateAccountForm form){
         if (form.name() != null) account.setName(form.name());
         if (form.description() != null) account.setDescription(form.description());
