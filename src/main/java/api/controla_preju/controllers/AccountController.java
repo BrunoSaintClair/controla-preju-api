@@ -9,6 +9,7 @@ import api.controla_preju.dtos.views.CreatedAccountView;
 import api.controla_preju.dtos.views.ExpenseDetailsView;
 import api.controla_preju.dtos.views.RevenueDetailsView;
 import api.controla_preju.entities.User;
+import api.controla_preju.entities.enums.PaymentMethod;
 import api.controla_preju.services.AccountService;
 import api.controla_preju.services.ExpenseService;
 import api.controla_preju.services.RevenueService;
@@ -21,7 +22,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/accounts")
@@ -50,7 +50,7 @@ public class AccountController {
     public ResponseEntity<List<AccountDetailsView>> getAllByUser(@AuthenticationPrincipal(expression = "id") UUID userId){
         List<AccountDetailsView> accounts = accountService.findAllByUserId(userId).stream()
                 .map(AccountDetailsView::new)
-                .collect(Collectors.toList());
+                .toList();
         if (accounts.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(accounts);
     }
@@ -113,25 +113,27 @@ public class AccountController {
                 .findRevenuesByAccount(accountId, userId, year, month, day)
                 .stream()
                 .map(RevenueDetailsView::new)
-                .collect(Collectors.toList());
+                .toList();
         if (revenues.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(revenues);
     }
 
     @GetMapping("/{accountId}/expenses")
     public ResponseEntity<List<ExpenseDetailsView>> getExpensesByAccount(
-                                                            @PathVariable UUID accountId,
-                                                            @RequestParam(required = false) Optional<Integer> year,
-                                                            @RequestParam(required = false) Optional<Integer> month,
-                                                            @RequestParam(required = false) Optional<Integer> day,
-                                                            @AuthenticationPrincipal(expression = "id") UUID userId) {
-        List<ExpenseDetailsView> expense = expenseService
-                .findExpensesByAccount(accountId, userId, year, month, day)
+                                                        @PathVariable UUID accountId,
+                                                        @RequestParam(required = false) Optional<Integer> year,
+                                                        @RequestParam(required = false) Optional<Integer> month,
+                                                        @RequestParam(required = false) Optional<Integer> day,
+                                                        @RequestParam(required = false) Optional<PaymentMethod> paymentMethod,
+                                                        @AuthenticationPrincipal(expression = "id") UUID userId) {
+
+        List<ExpenseDetailsView> expenses = expenseService
+                .findExpensesByAccount(accountId, userId, year, month, day, paymentMethod)
                 .stream()
                 .map(ExpenseDetailsView::new)
-                .collect(Collectors.toList());
-        if (expense.isEmpty()) return ResponseEntity.noContent().build();
-        return ResponseEntity.ok(expense);
+                .toList();
+        if (expenses.isEmpty()) return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(expenses);
     }
 
 }

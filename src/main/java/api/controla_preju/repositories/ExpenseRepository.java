@@ -1,6 +1,7 @@
 package api.controla_preju.repositories;
 
 import api.controla_preju.entities.Expense;
+import api.controla_preju.entities.enums.PaymentMethod;
 import api.controla_preju.repositories.jpa.ExpenseJpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -43,6 +44,14 @@ public class ExpenseRepository {
 
     public List<Expense> findAllByAccountIdAndYearAndMonthAndDay(UUID accountId, int year, int month, int day) {
         return expenseJpaRepository.findAllByAccountIdAndYearAndMonthAndDay(accountId, year, month, day);
+    }
+
+    public List<Expense> findAllByUserIdAndPaymentMethod(UUID userId, PaymentMethod paymentMethod) {
+        return expenseJpaRepository.findAllByUserIdAndPaymentMethod(userId, paymentMethod);
+    }
+
+    public List<Expense> findAllByAccountIdAndPaymentMethod(UUID accountId, PaymentMethod paymentMethod) {
+        return expenseJpaRepository.findAllByAccountIdAndPaymentMethod(accountId, paymentMethod);
     }
 
 }

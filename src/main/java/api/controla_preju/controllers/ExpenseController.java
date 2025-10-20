@@ -5,6 +5,7 @@ import api.controla_preju.dtos.forms.UpdateExpenseForm;
 import api.controla_preju.dtos.views.CreatedExpenseView;
 import api.controla_preju.dtos.views.ExpenseDetailsView;
 import api.controla_preju.entities.User;
+import api.controla_preju.entities.enums.PaymentMethod;
 import api.controla_preju.services.ExpenseService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -35,8 +37,11 @@ public class ExpenseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ExpenseDetailsView>> getAllByUser(@AuthenticationPrincipal(expression = "id") UUID userId){
-        var expenses = expenseService.findAllByUserId(userId)
+    public ResponseEntity<List<ExpenseDetailsView>> getAllByUser(
+                                                @AuthenticationPrincipal(expression = "id") UUID userId,
+                                                @RequestParam(required = false) Optional<PaymentMethod> paymentMethod) {
+
+        var expenses = expenseService.findAllByUserId(userId, paymentMethod)
                 .stream()
                 .map(ExpenseDetailsView::new)
                 .toList();

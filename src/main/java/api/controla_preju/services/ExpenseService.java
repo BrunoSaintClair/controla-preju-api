@@ -5,6 +5,7 @@ import api.controla_preju.dtos.forms.UpdateExpenseForm;
 import api.controla_preju.entities.Account;
 import api.controla_preju.entities.Expense;
 import api.controla_preju.entities.User;
+import api.controla_preju.entities.enums.PaymentMethod;
 import api.controla_preju.exceptions.AuthorizationException;
 import api.controla_preju.exceptions.BusinessException;
 import api.controla_preju.repositories.ExpenseRepository;
@@ -83,14 +84,21 @@ public class ExpenseService {
         return expenseRepository.save(expense);
     }
 
-    public List<Expense> findAllByUserId(UUID userId){
+    public List<Expense> findAllByUserId(UUID userId, Optional<PaymentMethod> paymentMethod) {
+        if (paymentMethod.isPresent()) {
+            return expenseRepository.findAllByUserIdAndPaymentMethod(userId, paymentMethod.get());
+        }
         return expenseRepository.findAllByUserId(userId);
     }
 
     public List<Expense> findExpensesByAccount(UUID accountId, UUID userId,
                                                Optional<Integer> year, Optional<Integer> month,
-                                               Optional<Integer> day) {
+                                               Optional<Integer> day, Optional<PaymentMethod> paymentMethod) {
         accountService.findById(accountId, userId);
+        if (paymentMethod.isPresent()) {
+            return expenseRepository.findAllByAccountIdAndPaymentMethod(accountId, paymentMethod.get());
+        }
+
         if (year.isPresent() && month.isPresent() && day.isPresent()) {
             return expenseRepository.findAllByAccountIdAndYearAndMonthAndDay(accountId, year.get(), month.get(), day.get());
         }
