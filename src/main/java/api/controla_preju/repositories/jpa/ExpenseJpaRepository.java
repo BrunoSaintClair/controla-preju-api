@@ -1,6 +1,7 @@
 package api.controla_preju.repositories.jpa;
 
 import api.controla_preju.entities.Expense;
+import api.controla_preju.entities.enums.ExpenseCategory;
 import api.controla_preju.entities.enums.PaymentMethod;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,6 +14,8 @@ public interface ExpenseJpaRepository extends JpaRepository<Expense, UUID> {
     List<Expense> findAllByAccountId(UUID accountId);
 
     List<Expense> findAllByAccountIdAndPaymentMethod(UUID accountId, PaymentMethod paymentMethod);
+
+    List<Expense> findAllByAccountIdAndCategory(UUID accountId, ExpenseCategory category);
 
     @Query("SELECT e FROM Expense e WHERE e.account.user.id = :userId AND e.paymentMethod = :paymentMethod")
     List<Expense> findAllByUserIdAndPaymentMethod(@Param("userId") UUID userId,
@@ -37,5 +40,8 @@ public interface ExpenseJpaRepository extends JpaRepository<Expense, UUID> {
             AND EXTRACT(DAY FROM e.createdAt) = :day
             """)
     List<Expense> findAllByAccountIdAndYearAndMonthAndDay(UUID accountId, int year, int month, int day);
+
+    @Query("SELECT e FROM Expense e WHERE e.account.user.id = :userId AND e.category = :category")
+    List<Expense> findAllByUserIdAndCategory(@Param("userId") UUID userId, @Param("category") ExpenseCategory category);
 
 }

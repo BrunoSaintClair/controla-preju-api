@@ -5,6 +5,7 @@ import api.controla_preju.dtos.forms.UpdateExpenseForm;
 import api.controla_preju.entities.Account;
 import api.controla_preju.entities.Expense;
 import api.controla_preju.entities.User;
+import api.controla_preju.entities.enums.ExpenseCategory;
 import api.controla_preju.entities.enums.PaymentMethod;
 import api.controla_preju.exceptions.AuthorizationException;
 import api.controla_preju.exceptions.BusinessException;
@@ -84,31 +85,39 @@ public class ExpenseService {
         return expenseRepository.save(expense);
     }
 
-    public List<Expense> findAllByUserId(UUID userId, Optional<PaymentMethod> paymentMethod) {
+    public List<Expense> findAllByUserId(UUID userId, Optional<PaymentMethod> paymentMethod,
+                                         Optional<ExpenseCategory> category) {
         if (paymentMethod.isPresent()) {
             return expenseRepository.findAllByUserIdAndPaymentMethod(userId, paymentMethod.get());
+        }
+        if (category.isPresent()) {
+            return expenseRepository.findAllByUserIdAndCategory(userId, category.get());
         }
         return expenseRepository.findAllByUserId(userId);
     }
 
     public List<Expense> findExpensesByAccount(UUID accountId, UUID userId,
                                                Optional<Integer> year, Optional<Integer> month,
-                                               Optional<Integer> day, Optional<PaymentMethod> paymentMethod) {
+                                               Optional<Integer> day, Optional<PaymentMethod> paymentMethod,
+                                               Optional<ExpenseCategory> category) {
         accountService.findById(accountId, userId);
+
         if (paymentMethod.isPresent()) {
             return expenseRepository.findAllByAccountIdAndPaymentMethod(accountId, paymentMethod.get());
         }
-
+        if (category.isPresent()) {
+            return expenseRepository.findAllByAccountIdAndCategory(accountId, category.get());
+        }
         if (year.isPresent() && month.isPresent() && day.isPresent()) {
             return expenseRepository.findAllByAccountIdAndYearAndMonthAndDay(accountId, year.get(), month.get(), day.get());
         }
         if (year.isPresent() && month.isPresent()) {
             return expenseRepository.findAllByAccountIdAndYearAndMonth(accountId, year.get(), month.get());
         }
-        if (year.isEmpty() && month.isEmpty() && day.isEmpty()) {
+        if (year.isEmpty() && month.isEmpty() && day.isEmpty() && paymentMethod.isEmpty() && category.isEmpty()) {
             return expenseRepository.findAllByAccountId(accountId);
         }
-        throw new BusinessException("Combinação de filtros inválida.");
+        throw new BusinessException("Combinação de filtros inválida ou não suportada.");
     }
 
 }

@@ -9,6 +9,7 @@ import api.controla_preju.dtos.views.CreatedAccountView;
 import api.controla_preju.dtos.views.ExpenseDetailsView;
 import api.controla_preju.dtos.views.RevenueDetailsView;
 import api.controla_preju.entities.User;
+import api.controla_preju.entities.enums.ExpenseCategory;
 import api.controla_preju.entities.enums.PaymentMethod;
 import api.controla_preju.services.AccountService;
 import api.controla_preju.services.ExpenseService;
@@ -125,13 +126,14 @@ public class AccountController {
                                                         @RequestParam(required = false) Optional<Integer> month,
                                                         @RequestParam(required = false) Optional<Integer> day,
                                                         @RequestParam(required = false) Optional<PaymentMethod> paymentMethod,
+                                                        @RequestParam(required = false) Optional<ExpenseCategory> category,
                                                         @AuthenticationPrincipal(expression = "id") UUID userId) {
-
         List<ExpenseDetailsView> expenses = expenseService
-                .findExpensesByAccount(accountId, userId, year, month, day, paymentMethod)
+                .findExpensesByAccount(accountId, userId, year, month, day, paymentMethod, category)
                 .stream()
                 .map(ExpenseDetailsView::new)
                 .toList();
+
         if (expenses.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(expenses);
     }

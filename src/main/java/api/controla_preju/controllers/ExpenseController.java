@@ -5,6 +5,7 @@ import api.controla_preju.dtos.forms.UpdateExpenseForm;
 import api.controla_preju.dtos.views.CreatedExpenseView;
 import api.controla_preju.dtos.views.ExpenseDetailsView;
 import api.controla_preju.entities.User;
+import api.controla_preju.entities.enums.ExpenseCategory;
 import api.controla_preju.entities.enums.PaymentMethod;
 import api.controla_preju.services.ExpenseService;
 import jakarta.validation.Valid;
@@ -38,10 +39,11 @@ public class ExpenseController {
 
     @GetMapping
     public ResponseEntity<List<ExpenseDetailsView>> getAllByUser(
-                                                @AuthenticationPrincipal(expression = "id") UUID userId,
-                                                @RequestParam(required = false) Optional<PaymentMethod> paymentMethod) {
+            @AuthenticationPrincipal(expression = "id") UUID userId,
+            @RequestParam(required = false) Optional<PaymentMethod> paymentMethod,
+            @RequestParam(required = false) Optional<ExpenseCategory> category) {
 
-        var expenses = expenseService.findAllByUserId(userId, paymentMethod)
+        var expenses = expenseService.findAllByUserId(userId, paymentMethod, category)
                 .stream()
                 .map(ExpenseDetailsView::new)
                 .toList();
