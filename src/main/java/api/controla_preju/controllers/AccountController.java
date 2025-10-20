@@ -11,6 +11,7 @@ import api.controla_preju.dtos.views.RevenueDetailsView;
 import api.controla_preju.entities.User;
 import api.controla_preju.entities.enums.ExpenseCategory;
 import api.controla_preju.entities.enums.PaymentMethod;
+import api.controla_preju.entities.enums.RevenueCategory;
 import api.controla_preju.services.AccountService;
 import api.controla_preju.services.ExpenseService;
 import api.controla_preju.services.RevenueService;
@@ -105,13 +106,14 @@ public class AccountController {
 
     @GetMapping("/{accountId}/revenues")
     public ResponseEntity<List<RevenueDetailsView>> getRevenuesByAccount(
-                                                            @PathVariable UUID accountId,
-                                                            @RequestParam(required = false) Optional<Integer> year,
-                                                            @RequestParam(required = false) Optional<Integer> month,
-                                                            @RequestParam(required = false) Optional<Integer> day,
-                                                            @AuthenticationPrincipal(expression = "id") UUID userId) {
+                                                        @PathVariable UUID accountId,
+                                                        @RequestParam(required = false) Optional<Integer> year,
+                                                        @RequestParam(required = false) Optional<Integer> month,
+                                                        @RequestParam(required = false) Optional<Integer> day,
+                                                        @RequestParam(required = false) Optional<RevenueCategory> category,
+                                                        @AuthenticationPrincipal(expression = "id") UUID userId) {
         List<RevenueDetailsView> revenues = revenueService
-                .findRevenuesByAccount(accountId, userId, year, month, day)
+                .findRevenuesByAccount(accountId, userId, year, month, day, category)
                 .stream()
                 .map(RevenueDetailsView::new)
                 .toList();
@@ -133,7 +135,6 @@ public class AccountController {
                 .stream()
                 .map(ExpenseDetailsView::new)
                 .toList();
-
         if (expenses.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(expenses);
     }

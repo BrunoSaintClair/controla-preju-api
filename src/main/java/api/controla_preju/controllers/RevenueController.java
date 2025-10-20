@@ -5,6 +5,7 @@ import api.controla_preju.dtos.forms.UpdateRevenueForm;
 import api.controla_preju.dtos.views.CreatedRevenueView;
 import api.controla_preju.dtos.views.RevenueDetailsView;
 import api.controla_preju.entities.User;
+import api.controla_preju.entities.enums.RevenueCategory;
 import api.controla_preju.services.RevenueService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -35,8 +37,10 @@ public class RevenueController {
     }
 
     @GetMapping
-    public ResponseEntity<List<RevenueDetailsView>> getAllByUser(@AuthenticationPrincipal(expression = "id") UUID userId){
-        var revenues = revenueService.findAllByUserId(userId)
+    public ResponseEntity<List<RevenueDetailsView>> getAllByUser(
+                                                    @AuthenticationPrincipal(expression = "id") UUID userId,
+                                                    @RequestParam(required = false) Optional<RevenueCategory> category) {
+        var revenues = revenueService.findAllByUserId(userId, category)
                 .stream()
                 .map(RevenueDetailsView::new)
                 .toList();

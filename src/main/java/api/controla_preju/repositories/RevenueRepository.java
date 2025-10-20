@@ -1,6 +1,7 @@
 package api.controla_preju.repositories;
 
 import api.controla_preju.entities.Revenue;
+import api.controla_preju.entities.enums.RevenueCategory;
 import api.controla_preju.repositories.jpa.RevenueJpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -43,6 +44,14 @@ public class RevenueRepository {
 
     public List<Revenue> findAllByAccountIdAndYearAndMonthAndDay(UUID accountId, int year, int month, int day) {
         return revenueJpaRepository.findAllByAccountIdAndYearAndMonthAndDay(accountId, year, month, day);
+    }
+
+    public List<Revenue> findAllByUserIdAndCategory(UUID userId, RevenueCategory category) {
+        return revenueJpaRepository.findAllByUserIdAndCategory(userId, category);
+    }
+
+    public List<Revenue> findAllByAccountIdAndCategory(UUID accountId, RevenueCategory category) {
+        return revenueJpaRepository.findAllByAccountIdAndCategory(accountId, category);
     }
 
 }

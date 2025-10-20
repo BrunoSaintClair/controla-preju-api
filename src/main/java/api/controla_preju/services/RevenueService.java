@@ -5,6 +5,7 @@ import api.controla_preju.dtos.forms.UpdateRevenueForm;
 import api.controla_preju.entities.Account;
 import api.controla_preju.entities.Revenue;
 import api.controla_preju.entities.User;
+import api.controla_preju.entities.enums.RevenueCategory;
 import api.controla_preju.exceptions.AuthorizationException;
 import api.controla_preju.exceptions.BusinessException;
 import api.controla_preju.repositories.RevenueRepository;
@@ -84,14 +85,21 @@ public class RevenueService {
         return revenueRepository.save(revenue);
     }
 
-    public List<Revenue> findAllByUserId(UUID userId){
+    public List<Revenue> findAllByUserId(UUID userId, Optional<RevenueCategory> category) {
+        if (category.isPresent()) {
+            return revenueRepository.findAllByUserIdAndCategory(userId, category.get());
+        }
         return revenueRepository.findAllByUserId(userId);
     }
 
     public List<Revenue> findRevenuesByAccount(UUID accountId, UUID userId,
                                                Optional<Integer> year, Optional<Integer> month,
-                                               Optional<Integer> day) {
+                                               Optional<Integer> day, Optional<RevenueCategory> category) {
         accountService.findById(accountId, userId);
+
+        if (category.isPresent()) {
+            return revenueRepository.findAllByAccountIdAndCategory(accountId, category.get());
+        }
         if (year.isPresent() && month.isPresent() && day.isPresent()) {
             return revenueRepository.findAllByAccountIdAndYearAndMonthAndDay(accountId, year.get(), month.get(), day.get());
         }
@@ -101,7 +109,8 @@ public class RevenueService {
         if (year.isEmpty() && month.isEmpty() && day.isEmpty()) {
             return revenueRepository.findAllByAccountId(accountId);
         }
-        throw new BusinessException("Combinação de filtros inválida.");
+
+        throw new BusinessException("Combinação de filtros inválida ou não suportada.");
     }
 
 
