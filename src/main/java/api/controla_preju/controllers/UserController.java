@@ -1,6 +1,7 @@
 package api.controla_preju.controllers;
 
 import api.controla_preju.dtos.forms.CreateUserForm;
+import api.controla_preju.dtos.forms.UpdateUserNameForm;
 import api.controla_preju.dtos.views.CreatedUserView;
 import api.controla_preju.dtos.views.UserDetailsView;
 import api.controla_preju.entities.User;
@@ -47,6 +48,14 @@ public class UserController {
     public ResponseEntity<UserDetailsView> getById(@AuthenticationPrincipal(expression = "id") UUID id){
         var user = userService.findById(id);
         var response = new UserDetailsView(user);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping
+    public ResponseEntity<UserDetailsView> updateName(@Valid @RequestBody UpdateUserNameForm form,
+                                                      @AuthenticationPrincipal User authenticatedUser) {
+        var updatedUser = userService.updateName(authenticatedUser, form.name());
+        var response = new UserDetailsView(updatedUser);
         return ResponseEntity.ok(response);
     }
 

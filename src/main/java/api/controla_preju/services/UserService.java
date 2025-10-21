@@ -54,4 +54,10 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
+    public User updateName(User user, String newName) {
+        user.setName(newName);
+        return userRepository.save(user);
+    }
+
 }
