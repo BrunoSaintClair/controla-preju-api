@@ -25,18 +25,18 @@ public class Transfer {
     @Column(nullable = false)
     private LocalDateTime createdAt;
     @ManyToOne
-    private Account source;
+    private Account sourceAccount;
     @ManyToOne
-    private Account destination;
+    private Account destinationAccount;
 
     public Transfer(String title, String description, long amountInCents, LocalDateTime createdAt,
-                    Account source, Account destination) {
+                    Account sourceAccount, Account destinationAccount) {
         this.title = title;
         this.description = description;
         this.amountInCents = amountInCents;
         this.createdAt = createdAt;
-        this.source = source;
-        this.destination = destination;
+        this.sourceAccount = sourceAccount;
+        this.destinationAccount = destinationAccount;
     }
 
 }
