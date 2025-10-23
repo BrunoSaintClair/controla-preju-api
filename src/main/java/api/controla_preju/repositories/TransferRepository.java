@@ -4,6 +4,9 @@ import api.controla_preju.entities.Transfer;
 import api.controla_preju.repositories.jpa.TransferJpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+import java.util.UUID;
+
 @Repository
 public class TransferRepository {
 
@@ -15,6 +18,14 @@ public class TransferRepository {
 
     public Transfer save(Transfer newTransfer){
         return transferJpaRepository.save(newTransfer);
+    }
+
+    public Optional<Transfer> findById(UUID id) {
+        return transferJpaRepository.findById(id);
+    }
+
+    public void delete(Transfer transfer) {
+        transferJpaRepository.delete(transfer);
     }
 
 }

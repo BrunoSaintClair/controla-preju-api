@@ -6,10 +6,7 @@ import api.controla_preju.services.TransferService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.UUID;
@@ -32,6 +29,14 @@ public class TransferController {
         var response = new TransferDetailsView(newTransfer);
         URI location = URI.create("/transfers/" + newTransfer.getId());
         return ResponseEntity.created(location).body(response);
+    }
+
+    @DeleteMapping("/{transferId}")
+    public ResponseEntity<Void> delete(@PathVariable UUID transferId,
+                                       @AuthenticationPrincipal(expression = "id") UUID userId) {
+        var transfer = transferService.findById(transferId, userId);
+        transferService.delete(transfer);
+        return ResponseEntity.noContent().build();
     }
 
 }
