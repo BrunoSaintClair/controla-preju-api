@@ -4,10 +4,7 @@ import api.controla_preju.dtos.forms.CreateAccountForm;
 import api.controla_preju.dtos.forms.UpdateAccountForm;
 import api.controla_preju.dtos.forms.UpdateBalanceForm;
 import api.controla_preju.dtos.forms.UpdateCanChangeBalanceForm;
-import api.controla_preju.dtos.views.AccountDetailsView;
-import api.controla_preju.dtos.views.CreatedAccountView;
-import api.controla_preju.dtos.views.ExpenseDetailsView;
-import api.controla_preju.dtos.views.RevenueDetailsView;
+import api.controla_preju.dtos.views.*;
 import api.controla_preju.entities.User;
 import api.controla_preju.entities.enums.ExpenseCategory;
 import api.controla_preju.entities.enums.PaymentMethod;
@@ -15,6 +12,7 @@ import api.controla_preju.entities.enums.RevenueCategory;
 import api.controla_preju.services.AccountService;
 import api.controla_preju.services.ExpenseService;
 import api.controla_preju.services.RevenueService;
+import api.controla_preju.services.TransferService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -32,11 +30,14 @@ public class AccountController {
     private final AccountService accountService;
     private final RevenueService revenueService;
     private final ExpenseService expenseService;
+    private final TransferService transferService;
 
-    public AccountController(AccountService accountService, RevenueService revenueService, ExpenseService expenseService) {
+    public AccountController(AccountService accountService, RevenueService revenueService,
+                             ExpenseService expenseService, TransferService transferService) {
         this.accountService = accountService;
         this.revenueService = revenueService;
         this.expenseService = expenseService;
+        this.transferService = transferService;
     }
 
     @PostMapping
@@ -137,6 +138,30 @@ public class AccountController {
                 .toList();
         if (expenses.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(expenses);
+    }
+
+    @GetMapping("/{accountId}/transfers/sent")
+    public ResponseEntity<List<TransferDetailsView>> getSentTransfersByAccount(
+                                                        @PathVariable UUID accountId,
+                                                        @AuthenticationPrincipal(expression = "id") UUID userId) {
+        List<TransferDetailsView> transfers = transferService.findAllBySourceAccount(accountId, userId)
+                .stream()
+                .map(TransferDetailsView::new)
+                .toList();
+        if (transfers.isEmpty()) return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(transfers);
+    }
+
+    @GetMapping("/{accountId}/transfers/received")
+    public ResponseEntity<List<TransferDetailsView>> getReceivedTransfersByAccount(
+                                                        @PathVariable UUID accountId,
+                                                        @AuthenticationPrincipal(expression = "id") UUID userId) {
+        List<TransferDetailsView> transfers = transferService.findAllByDestinationAccount(accountId, userId)
+                .stream()
+                .map(TransferDetailsView::new)
+                .toList();
+        if (transfers.isEmpty()) return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(transfers);
     }
 
 }
