@@ -17,4 +17,20 @@ public interface TransferJpaRepository extends JpaRepository<Transfer, UUID> {
 
     List<Transfer> findAllByDestinationAccountId(UUID destinationAccountId);
 
+    @Query("""
+            SELECT t FROM Transfer t
+            WHERE (t.sourceAccount.user.id = :userId OR t.destinationAccount.user.id = :userId)
+            AND EXTRACT(YEAR FROM t.createdAt) = :year
+            AND EXTRACT(MONTH FROM t.createdAt) = :month
+            """)
+    List<Transfer> findAllByUserIdAndYearAndMonth(@Param("userId") UUID userId, @Param("year") int year, @Param("month") int month);
+
+    @Query("""
+            SELECT t FROM Transfer t
+            WHERE (t.sourceAccount.user.id = :userId OR t.destinationAccount.user.id = :userId)
+            AND EXTRACT(YEAR FROM t.createdAt) = :year
+            AND EXTRACT(MONTH FROM t.createdAt) = :month
+            AND EXTRACT(DAY FROM t.createdAt) = :day
+            """)
+    List<Transfer> findAllByUserIdAndYearAndMonthAndDay(@Param("userId") UUID userId, @Param("year") int year, @Param("month") int month, @Param("day") int day);
 }

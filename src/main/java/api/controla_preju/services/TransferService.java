@@ -5,6 +5,7 @@ import api.controla_preju.dtos.forms.UpdateTransferForm;
 import api.controla_preju.entities.Account;
 import api.controla_preju.entities.Transfer;
 import api.controla_preju.exceptions.AuthorizationException;
+import api.controla_preju.exceptions.BusinessException;
 import api.controla_preju.repositories.TransferRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
@@ -79,8 +80,18 @@ public class TransferService {
         transferRepository.delete(transfer);
     }
 
-    public List<Transfer> findAllByUserId(UUID userId) {
-        return transferRepository.findAllByUserId(userId);
+    public List<Transfer> findAllByUserId(UUID userId, Optional<Integer> year, Optional<Integer> month, Optional<Integer> day) {
+        if (year.isPresent() && month.isPresent() && day.isPresent()) {
+            return transferRepository.findAllByUserIdAndYearAndMonthAndDay(userId, year.get(), month.get(), day.get());
+        }
+        if (year.isPresent() && month.isPresent()) {
+            return transferRepository.findAllByUserIdAndYearAndMonth(userId, year.get(), month.get());
+        }
+        if (year.isEmpty() && month.isEmpty() && day.isEmpty()) {
+            return transferRepository.findAllByUserId(userId);
+        }
+
+        throw new BusinessException("Combinação de filtros de data inválida. Forneça ano/mês ou ano/mês/dia.");
     }
 
     public List<Transfer> findAllBySourceAccount(UUID accountId, UUID userId) {

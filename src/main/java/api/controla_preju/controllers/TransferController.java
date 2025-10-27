@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -50,8 +51,11 @@ public class TransferController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TransferDetailsView>> getAllByUser(@AuthenticationPrincipal(expression = "id") UUID userId) {
-        List<TransferDetailsView> transfers = transferService.findAllByUserId(userId)
+    public ResponseEntity<List<TransferDetailsView>> getAllByUser(@AuthenticationPrincipal(expression = "id") UUID userId,
+                                                                  @RequestParam(required = false) Optional<Integer> year,
+                                                                  @RequestParam(required = false) Optional<Integer> month,
+                                                                  @RequestParam(required = false) Optional<Integer> day) {
+        List<TransferDetailsView> transfers = transferService.findAllByUserId(userId, year, month, day)
                 .stream()
                 .map(TransferDetailsView::new)
                 .toList();

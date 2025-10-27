@@ -41,4 +41,12 @@ public class TransferRepository {
         return transferJpaRepository.findAllByDestinationAccountId(destinationAccountId);
     }
 
+    public List<Transfer> findAllByUserIdAndYearAndMonth(UUID userId, int year, int month) {
+        return transferJpaRepository.findAllByUserIdAndYearAndMonth(userId, year, month);
+    }
+
+    public List<Transfer> findAllByUserIdAndYearAndMonthAndDay(UUID userId, int year, int month, int day) {
+        return transferJpaRepository.findAllByUserIdAndYearAndMonthAndDay(userId, year, month, day);
+    }
+
 }
