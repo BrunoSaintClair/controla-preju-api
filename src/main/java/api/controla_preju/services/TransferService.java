@@ -82,4 +82,14 @@ public class TransferService {
         return transferRepository.findAllByUserId(userId);
     }
 
+    public List<Transfer> findAllBySourceAccount(UUID accountId, UUID userId) {
+        accountService.findById(accountId, userId);
+        return transferRepository.findAllBySourceAccountId(accountId);
+    }
+
+    public List<Transfer> findAllByDestinationAccount(UUID accountId, UUID userId) {
+        accountService.findById(accountId, userId);
+        return transferRepository.findAllByDestinationAccountId(accountId);
+    }
+
 }

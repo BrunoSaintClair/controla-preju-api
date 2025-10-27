@@ -33,4 +33,12 @@ public class TransferRepository {
         return transferJpaRepository.findAllByUserId(userId);
     }
 
+    public List<Transfer> findAllBySourceAccountId(UUID sourceAccountId) {
+        return transferJpaRepository.findAllBySourceAccountId(sourceAccountId);
+    }
+
+    public List<Transfer> findAllByDestinationAccountId(UUID destinationAccountId) {
+        return transferJpaRepository.findAllByDestinationAccountId(destinationAccountId);
+    }
+
 }
