@@ -9,6 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -37,6 +38,24 @@ public class TransferController {
         var transfer = transferService.findById(transferId, userId);
         transferService.delete(transfer);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{transferId}")
+    public ResponseEntity<TransferDetailsView> getById(@PathVariable UUID transferId,
+                                       @AuthenticationPrincipal(expression = "id") UUID userId) {
+        var transfer = transferService.findById(transferId, userId);
+        var response = new TransferDetailsView(transfer);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<TransferDetailsView>> getAllByUser(@AuthenticationPrincipal(expression = "id") UUID userId) {
+        List<TransferDetailsView> transfers = transferService.findAllByUserId(userId)
+                .stream()
+                .map(TransferDetailsView::new)
+                .toList();
+        if (transfers.isEmpty()) return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(transfers);
     }
 
 }

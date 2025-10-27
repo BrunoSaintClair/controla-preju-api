@@ -9,6 +9,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -75,6 +76,10 @@ public class TransferService {
         destinationAccount.setBalanceInCents(destinationAccount.getBalanceInCents() - amount);
 
         transferRepository.delete(transfer);
+    }
+
+    public List<Transfer> findAllByUserId(UUID userId) {
+        return transferRepository.findAllByUserId(userId);
     }
 
 }
