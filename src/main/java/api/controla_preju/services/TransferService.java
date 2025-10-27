@@ -1,6 +1,7 @@
 package api.controla_preju.services;
 
 import api.controla_preju.dtos.forms.CreateTransferForm;
+import api.controla_preju.dtos.forms.UpdateTransferForm;
 import api.controla_preju.entities.Account;
 import api.controla_preju.entities.Transfer;
 import api.controla_preju.exceptions.AuthorizationException;
@@ -90,6 +91,25 @@ public class TransferService {
     public List<Transfer> findAllByDestinationAccount(UUID accountId, UUID userId) {
         accountService.findById(accountId, userId);
         return transferRepository.findAllByDestinationAccountId(accountId);
+    }
+
+    @Transactional
+    public Transfer update(Transfer transfer, UpdateTransferForm form) {
+        Account sourceAccount = transfer.getSourceAccount();
+        Account destinationAccount = transfer.getDestinationAccount();
+        long oldAmount = transfer.getAmountInCents();
+
+        if (form.title() != null) transfer.setTitle(form.title());
+        if (form.description() != null) transfer.setDescription(form.description());
+        if (form.createdAt() != null) transfer.setCreatedAt(form.createdAt());
+        if (form.amountInCents() != null) transfer.setAmountInCents(form.amountInCents());
+
+        long newAmount = transfer.getAmountInCents();
+        long difference = newAmount - oldAmount;
+        sourceAccount.setBalanceInCents(sourceAccount.getBalanceInCents() - difference);
+        destinationAccount.setBalanceInCents(destinationAccount.getBalanceInCents() + difference);
+
+        return transferRepository.save(transfer);
     }
 
 }

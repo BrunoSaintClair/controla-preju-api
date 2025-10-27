@@ -1,6 +1,7 @@
 package api.controla_preju.controllers;
 
 import api.controla_preju.dtos.forms.CreateTransferForm;
+import api.controla_preju.dtos.forms.UpdateTransferForm;
 import api.controla_preju.dtos.views.TransferDetailsView;
 import api.controla_preju.services.TransferService;
 import jakarta.validation.Valid;
@@ -56,6 +57,16 @@ public class TransferController {
                 .toList();
         if (transfers.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(transfers);
+    }
+
+    @PatchMapping("/{transferId}")
+    public ResponseEntity<TransferDetailsView> update(@PathVariable UUID transferId,
+                                                      @Valid @RequestBody UpdateTransferForm form,
+                                                      @AuthenticationPrincipal(expression = "id") UUID userId) {
+        var transfer = transferService.findById(transferId, userId);
+        var updatedTransfer = transferService.update(transfer, form);
+        var response = new TransferDetailsView(updatedTransfer);
+        return ResponseEntity.ok(response);
     }
 
 }
