@@ -44,7 +44,6 @@ public class RevenueController {
                 .stream()
                 .map(RevenueDetailsView::new)
                 .toList();
-        if (revenues.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(revenues);
     }
 

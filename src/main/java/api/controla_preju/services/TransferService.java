@@ -41,6 +41,10 @@ public class TransferService {
         Account sourceAccount = accountService.findById(form.sourceAccountId(), userId);
         Account destinationAccount = accountService.findById(form.destinationAccountId(), userId);
 
+        if (form.sourceAccountId().equals(form.destinationAccountId())) {
+            throw new BusinessException("A conta de origem e destino não podem ser a mesma.");
+        }
+
         Transfer newTransfer = new Transfer(
                 form.title(),
                 form.description(),
@@ -114,8 +118,18 @@ public class TransferService {
         Account destinationAccount = transfer.getDestinationAccount();
         long oldAmount = transfer.getAmountInCents();
 
-        if (form.title() != null) transfer.setTitle(form.title());
-        if (form.description() != null) transfer.setDescription(form.description());
+        if (form.title() != null) {
+            if (form.title().isBlank()) {
+                throw new BusinessException("O título da transferência não pode ser vazio.");
+            }
+            transfer.setTitle(form.title());
+        }
+        if (form.description() != null) {
+            if (form.description().isBlank()) {
+                throw new BusinessException("A descrição da transferência não pode ser vazia.");
+            }
+            transfer.setDescription(form.description());
+        }
         if (form.createdAt() != null) transfer.setCreatedAt(form.createdAt());
         if (form.amountInCents() != null) transfer.setAmountInCents(form.amountInCents());
 

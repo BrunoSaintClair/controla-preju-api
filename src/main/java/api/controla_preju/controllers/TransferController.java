@@ -59,7 +59,6 @@ public class TransferController {
                 .stream()
                 .map(TransferDetailsView::new)
                 .toList();
-        if (transfers.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(transfers);
     }
 

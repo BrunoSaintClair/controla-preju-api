@@ -54,7 +54,6 @@ public class AccountController {
         List<AccountDetailsView> accounts = accountService.findAllByUserId(userId).stream()
                 .map(AccountDetailsView::new)
                 .toList();
-        if (accounts.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(accounts);
     }
 
@@ -118,7 +117,6 @@ public class AccountController {
                 .stream()
                 .map(RevenueDetailsView::new)
                 .toList();
-        if (revenues.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(revenues);
     }
 
@@ -136,7 +134,6 @@ public class AccountController {
                 .stream()
                 .map(ExpenseDetailsView::new)
                 .toList();
-        if (expenses.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(expenses);
     }
 
@@ -148,7 +145,6 @@ public class AccountController {
                 .stream()
                 .map(TransferDetailsView::new)
                 .toList();
-        if (transfers.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(transfers);
     }
 
@@ -160,7 +156,6 @@ public class AccountController {
                 .stream()
                 .map(TransferDetailsView::new)
                 .toList();
-        if (transfers.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(transfers);
     }
 

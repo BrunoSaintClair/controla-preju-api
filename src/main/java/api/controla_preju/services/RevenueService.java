@@ -76,8 +76,18 @@ public class RevenueService {
         Account account = revenue.getAccount();
         long oldAmount = revenue.getAmountInCents();
 
-        if (form.title() != null) revenue.setTitle(form.title());
-        if (form.description() != null) revenue.setDescription(form.description());
+        if (form.title() != null) {
+            if (form.title().isBlank()) {
+                throw new BusinessException("O título da receita não pode ser vazio.");
+            }
+            revenue.setTitle(form.title());
+        }
+        if (form.description() != null) {
+            if (form.description().isBlank()) {
+                throw new BusinessException("A descrição da receita não pode ser vazia.");
+            }
+            revenue.setDescription(form.description());
+        }
         if (form.category() != null) revenue.setCategory(form.category());
         if (form.createdAt() != null) revenue.setCreatedAt(form.createdAt());
         if (form.amountInCents() != null) revenue.setAmountInCents(form.amountInCents());

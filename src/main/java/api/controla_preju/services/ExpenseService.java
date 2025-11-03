@@ -75,8 +75,18 @@ public class ExpenseService {
         Account account = expense.getAccount();
         long oldAmount = expense.getAmountInCents();
 
-        if (form.title() != null) expense.setTitle(form.title());
-        if (form.description() != null) expense.setDescription(form.description());
+        if (form.title() != null) {
+            if (form.title().isBlank()) {
+                throw new BusinessException("O título da despesa não pode ser vazio.");
+            }
+            expense.setTitle(form.title());
+        }
+        if (form.description() != null) {
+            if (form.description().isBlank()) {
+                throw new BusinessException("A descrição da despesa não pode ser vazia.");
+            }
+            expense.setDescription(form.description());
+        }
         if (form.amountInCents() != null) expense.setAmountInCents(form.amountInCents());
         if (form.paymentMethod() != null) expense.setPaymentMethod(form.paymentMethod());
         if (form.category() != null) expense.setCategory(form.category());

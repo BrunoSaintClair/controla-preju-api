@@ -79,8 +79,18 @@ public class AccountService {
 
     @Transactional
     public Account update(Account account, UpdateAccountForm form){
-        if (form.name() != null) account.setName(form.name());
-        if (form.description() != null) account.setDescription(form.description());
+        if (form.name() != null) {
+            if (form.name().isBlank()) {
+                throw new BusinessException("O nome da conta não pode ser vazio.");
+            }
+            account.setName(form.name());
+        }
+        if (form.description() != null) {
+            if (form.description().isBlank()) {
+                throw new BusinessException("A descrição da conta não pode ser vazia.");
+            }
+            account.setDescription(form.description());
+        }
         if (form.type() != null) account.setType(form.type());
 
         return accountRepository.save(account);

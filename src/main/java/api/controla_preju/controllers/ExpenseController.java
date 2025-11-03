@@ -47,7 +47,6 @@ public class ExpenseController {
                 .stream()
                 .map(ExpenseDetailsView::new)
                 .toList();
-        if (expenses.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(expenses);
     }
 
