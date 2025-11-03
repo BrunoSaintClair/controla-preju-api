@@ -49,6 +49,10 @@ public class ExpenseService {
 
         Account account = accountService.findById(form.accountId(), owner.getId());
 
+        if (account.getBalanceInCents() < form.amountInCents()) {
+            throw new BusinessException("Saldo insuficiente para registrar a despesa.");
+        }
+
         Expense expense = new Expense(
                 form.title(),
                 form.description(),
@@ -94,6 +98,12 @@ public class ExpenseService {
 
         long newAmount = expense.getAmountInCents();
         long difference = newAmount - oldAmount;
+
+        long newBalance = account.getBalanceInCents() - difference;
+        if (newBalance < 0) {
+            throw new BusinessException("Saldo insuficiente para atualizar o valor da despesa.");
+        }
+
         account.setBalanceInCents(account.getBalanceInCents() - difference);
 
         return expenseRepository.save(expense);

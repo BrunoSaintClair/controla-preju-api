@@ -45,6 +45,10 @@ public class TransferService {
             throw new BusinessException("A conta de origem e destino não podem ser a mesma.");
         }
 
+        if (sourceAccount.getBalanceInCents() < form.amountInCents()) {
+            throw new BusinessException("Conta de origem não possui saldo suficiente para a transferência.");
+        }
+
         Transfer newTransfer = new Transfer(
                 form.title(),
                 form.description(),
@@ -135,6 +139,12 @@ public class TransferService {
 
         long newAmount = transfer.getAmountInCents();
         long difference = newAmount - oldAmount;
+
+        long newSourceBalance = sourceAccount.getBalanceInCents() - difference;
+        if (newSourceBalance < 0) {
+            throw new BusinessException("Saldo insuficiente na conta de origem para atualizar o valor da transferência.");
+        }
+
         sourceAccount.setBalanceInCents(sourceAccount.getBalanceInCents() - difference);
         destinationAccount.setBalanceInCents(destinationAccount.getBalanceInCents() + difference);
 
