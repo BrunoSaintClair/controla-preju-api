@@ -6,6 +6,7 @@ import api.controla_preju.entities.enums.PaymentMethod;
 import api.controla_preju.repositories.jpa.ExpenseJpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -62,4 +63,11 @@ public class ExpenseRepository {
     public List<Expense> findAllByAccountIdAndCategory(UUID accountId, ExpenseCategory category) {
         return expenseJpaRepository.findAllByAccountIdAndCategory(accountId, category);
     }
+
+    public boolean existsDuplicate(String title, LocalDateTime createdAt, long amountInCents, ExpenseCategory category) {
+        return expenseJpaRepository.existsByTitleAndCreatedAtAndAmountInCentsAndCategory(
+                title, createdAt, amountInCents, category
+        );
+    }
+
 }

@@ -45,6 +45,10 @@ public class RevenueService {
 
     @Transactional
     public Revenue create(CreateRevenueForm form, User owner){
+        if (revenueRepository.existsDuplicate(form.title(), form.createdAt(), form.amountInCents(), form.category())) {
+            throw new BusinessException("Uma receita com exatamente os mesmos dados já foi registrada.");
+        }
+
         Account account = accountService.findById(form.accountId(), owner.getId());
 
         Revenue revenue = new Revenue(

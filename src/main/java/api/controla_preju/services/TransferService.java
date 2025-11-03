@@ -32,6 +32,10 @@ public class TransferService {
 
     @Transactional
     public Transfer create(CreateTransferForm form, UUID userId){
+        if (transferRepository.existsDuplicate(form.title(), form.createdAt(), form.amountInCents())) {
+            throw new BusinessException("Uma transferência com exatamente os mesmos dados já foi registrada.");
+        }
+
         userService.findById(userId);
 
         Account sourceAccount = accountService.findById(form.sourceAccountId(), userId);

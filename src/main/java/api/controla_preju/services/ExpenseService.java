@@ -42,7 +42,11 @@ public class ExpenseService {
     }
 
     @Transactional
-    public Expense create(@Valid CreateExpenseForm form, User owner) {
+    public Expense create(CreateExpenseForm form, User owner) {
+        if (expenseRepository.existsDuplicate(form.title(), form.createdAt(), form.amountInCents(), form.category())) {
+            throw new BusinessException("Uma despesa com exatamente os mesmos dados já foi registrada.");
+        }
+
         Account account = accountService.findById(form.accountId(), owner.getId());
 
         Expense expense = new Expense(

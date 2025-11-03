@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,7 +24,9 @@ public interface TransferJpaRepository extends JpaRepository<Transfer, UUID> {
             AND EXTRACT(YEAR FROM t.createdAt) = :year
             AND EXTRACT(MONTH FROM t.createdAt) = :month
             """)
-    List<Transfer> findAllByUserIdAndYearAndMonth(@Param("userId") UUID userId, @Param("year") int year, @Param("month") int month);
+    List<Transfer> findAllByUserIdAndYearAndMonth(@Param("userId") UUID userId,
+                                                  @Param("year") int year,
+                                                  @Param("month") int month);
 
     @Query("""
             SELECT t FROM Transfer t
@@ -32,5 +35,13 @@ public interface TransferJpaRepository extends JpaRepository<Transfer, UUID> {
             AND EXTRACT(MONTH FROM t.createdAt) = :month
             AND EXTRACT(DAY FROM t.createdAt) = :day
             """)
-    List<Transfer> findAllByUserIdAndYearAndMonthAndDay(@Param("userId") UUID userId, @Param("year") int year, @Param("month") int month, @Param("day") int day);
+    List<Transfer> findAllByUserIdAndYearAndMonthAndDay(@Param("userId") UUID userId,
+                                                        @Param("year") int year,
+                                                        @Param("month") int month,
+                                                        @Param("day") int day);
+
+    boolean existsByTitleAndCreatedAtAndAmountInCents(
+            String title, LocalDateTime createdAt, long amountInCents
+    );
+
 }

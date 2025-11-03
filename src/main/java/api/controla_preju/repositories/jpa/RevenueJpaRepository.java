@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,4 +37,9 @@ public interface RevenueJpaRepository extends JpaRepository<Revenue, UUID> {
 
     @Query("SELECT r FROM Revenue r WHERE r.account.user.id = :userId AND r.category = :category")
     List<Revenue> findAllByUserIdAndCategory(@Param("userId") UUID userId, @Param("category") RevenueCategory category);
+
+    boolean existsByTitleAndCreatedAtAndAmountInCentsAndCategory(
+            String title, LocalDateTime createdAt, long amountInCents, RevenueCategory category
+    );
+
 }

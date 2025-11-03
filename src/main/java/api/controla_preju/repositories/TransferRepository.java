@@ -4,6 +4,7 @@ import api.controla_preju.entities.Transfer;
 import api.controla_preju.repositories.jpa.TransferJpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -47,6 +48,12 @@ public class TransferRepository {
 
     public List<Transfer> findAllByUserIdAndYearAndMonthAndDay(UUID userId, int year, int month, int day) {
         return transferJpaRepository.findAllByUserIdAndYearAndMonthAndDay(userId, year, month, day);
+    }
+
+    public boolean existsDuplicate(String title, LocalDateTime createdAt, long amountInCents) {
+        return transferJpaRepository.existsByTitleAndCreatedAtAndAmountInCents(
+                title, createdAt, amountInCents
+        );
     }
 
 }

@@ -5,6 +5,7 @@ import api.controla_preju.entities.enums.RevenueCategory;
 import api.controla_preju.repositories.jpa.RevenueJpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -52,6 +53,12 @@ public class RevenueRepository {
 
     public List<Revenue> findAllByAccountIdAndCategory(UUID accountId, RevenueCategory category) {
         return revenueJpaRepository.findAllByAccountIdAndCategory(accountId, category);
+    }
+
+    public boolean existsDuplicate(String title, LocalDateTime createdAt, long amountInCents, RevenueCategory category) {
+        return revenueJpaRepository.existsByTitleAndCreatedAtAndAmountInCentsAndCategory(
+                title, createdAt, amountInCents, category
+        );
     }
 
 }
