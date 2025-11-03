@@ -102,4 +102,8 @@ public class AccountService {
         return accountRepository.save(account);
     }
 
+    public long getTotalBalanceByUserId(UUID userId) {
+        return accountRepository.sumBalanceByUserId(userId).orElse(0L);
+    }
+
 }

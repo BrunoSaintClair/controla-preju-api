@@ -164,4 +164,11 @@ public class AccountController {
         return ResponseEntity.ok(transfers);
     }
 
+    @GetMapping("/balance")
+    public ResponseEntity<TotalBalanceView> getTotalBalance(@AuthenticationPrincipal(expression = "id") UUID userId) {
+        var totalBalance = accountService.getTotalBalanceByUserId(userId);
+        var response = new TotalBalanceView(totalBalance);
+        return ResponseEntity.ok(response);
+    }
+
 }

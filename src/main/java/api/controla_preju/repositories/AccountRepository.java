@@ -42,4 +42,8 @@ public class AccountRepository {
         return jpaRepository.countByUser(user);
     }
 
+    public Optional<Long> sumBalanceByUserId(UUID userId) {
+        return jpaRepository.sumBalanceByUserId(userId);
+    }
+
 }
