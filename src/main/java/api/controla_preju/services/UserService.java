@@ -1,6 +1,7 @@
 package api.controla_preju.services;
 
 import api.controla_preju.dtos.forms.CreateUserForm;
+import api.controla_preju.entities.Email;
 import api.controla_preju.entities.User;
 import api.controla_preju.exceptions.BusinessException;
 import api.controla_preju.repositories.UserRepository;
@@ -15,10 +16,12 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     public User findById(UUID id){
@@ -38,6 +41,8 @@ public class UserService {
                 form.name(),
                 encryptedPassword
         );
+
+        emailService.sendGenericEmail(new Email(newUser.getEmail(), "Cadastro", "Recebendo email de cadastro"));
 
         return userRepository.save(newUser);
     }
