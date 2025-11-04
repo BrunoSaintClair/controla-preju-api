@@ -35,6 +35,8 @@ public class SecurityConfig {
                         authorize -> authorize
                                 .requestMatchers(HttpMethod.POST, "/users").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/auth/confirm").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/auth/reject").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)

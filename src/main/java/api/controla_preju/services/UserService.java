@@ -18,7 +18,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
+                       EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
@@ -42,7 +43,7 @@ public class UserService {
                 encryptedPassword
         );
 
-        emailService.sendGenericEmail(new Email(newUser.getEmail(), "Cadastro", "Recebendo email de cadastro"));
+        emailService.sendRegisterEmail(newUser);
 
         return userRepository.save(newUser);
     }
