@@ -5,6 +5,7 @@ import api.controla_preju.entities.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -12,6 +13,10 @@ public class EmailService {
 
     @Value("${api.email.from}")
     private String from;
+    @Value("${api.confirm.email.route}")
+    private String confirmEmailRoute;
+    @Value("${api.reject.email.route}")
+    private String rejectEmailRoute;
     private final JavaMailSender mailSender;
     private final TokenService tokenService;
 
@@ -29,10 +34,11 @@ public class EmailService {
         mailSender.send(message);
     }
 
+    @Async
     public void sendRegisterEmail(User newUser){
         String confirmationToken = tokenService.generateToken(newUser);
-        String confirmationLink = "http://localhost:8080/api/v1/auth/confirm?token=" + confirmationToken;
-        String rejectionLink = "http://localhost:8080/api/v1/auth/reject?token=" + confirmationToken;
+        String confirmationLink = confirmEmailRoute + confirmationToken;
+        String rejectionLink = rejectEmailRoute + confirmationToken;
         String emailBody = String.format("""
         Olá, %s!
 
@@ -41,6 +47,8 @@ public class EmailService {
 
         Se você não fez este cadastro, por favor, rejeite clicando aqui:
         %s
+        
+        Atenciosamente, equipe ControlaPreju.
         """, newUser.getName(), confirmationLink, rejectionLink);
 
         var message = new SimpleMailMessage();

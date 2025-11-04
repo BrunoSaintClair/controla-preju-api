@@ -5,9 +5,11 @@ import api.controla_preju.entities.Email;
 import api.controla_preju.entities.User;
 import api.controla_preju.exceptions.BusinessException;
 import api.controla_preju.repositories.UserRepository;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -43,9 +45,9 @@ public class UserService {
                 encryptedPassword
         );
 
-        emailService.sendRegisterEmail(newUser);
-
-        return userRepository.save(newUser);
+        User savedUser = userRepository.save(newUser);
+        emailService.sendRegisterEmail(savedUser);
+        return savedUser;
     }
 
     @Transactional
