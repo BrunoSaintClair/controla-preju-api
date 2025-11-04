@@ -1,5 +1,6 @@
 package api.controla_preju.repositories;
 
+import api.controla_preju.dtos.views.TransactionHistoryView;
 import api.controla_preju.entities.Account;
 import api.controla_preju.entities.User;
 import api.controla_preju.repositories.jpa.AccountJpaRepository;
@@ -44,6 +45,10 @@ public class AccountRepository {
 
     public Optional<Long> sumBalanceByUserId(UUID userId) {
         return jpaRepository.sumBalanceByUserId(userId);
+    }
+
+    public List<TransactionHistoryView> getTransactionHistoryByUserId(UUID userId) {
+        return jpaRepository.getTransactionHistoryByUserId(userId);
     }
 
 }

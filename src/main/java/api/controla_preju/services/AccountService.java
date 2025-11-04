@@ -4,6 +4,7 @@ import api.controla_preju.dtos.forms.CreateAccountForm;
 import api.controla_preju.dtos.forms.UpdateAccountForm;
 import api.controla_preju.dtos.forms.UpdateBalanceForm;
 import api.controla_preju.dtos.forms.UpdateCanChangeBalanceForm;
+import api.controla_preju.dtos.views.TransactionHistoryView;
 import api.controla_preju.entities.Account;
 import api.controla_preju.entities.User;
 import api.controla_preju.exceptions.AuthorizationException;
@@ -114,6 +115,10 @@ public class AccountService {
 
     public long getTotalBalanceByUserId(UUID userId) {
         return accountRepository.sumBalanceByUserId(userId).orElse(0L);
+    }
+
+    public List<TransactionHistoryView> getTransactionHistory(UUID userId) {
+        return accountRepository.getTransactionHistoryByUserId(userId);
     }
 
 }

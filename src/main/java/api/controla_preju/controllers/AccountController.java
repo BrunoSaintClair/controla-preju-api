@@ -166,4 +166,11 @@ public class AccountController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/transactions")
+    public ResponseEntity<List<TransactionHistoryView>> getTransactionHistory(
+                                                            @AuthenticationPrincipal(expression = "id") UUID userId) {
+        List<TransactionHistoryView> history = accountService.getTransactionHistory(userId);
+        return ResponseEntity.ok(history);
+    }
+
 }
