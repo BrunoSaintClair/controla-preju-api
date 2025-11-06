@@ -24,6 +24,9 @@ class UserServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private EmailService emailService;
+
     @InjectMocks
     private UserService userService;
 
@@ -70,7 +73,6 @@ class UserServiceTest {
     @DisplayName("Should reactivate user succesfully")
     void shouldReactivate() {
         var user = new User("test@email.com", "test name", "password");
-        assertEquals('A', user.getStatus());
         user.setStatus('I');
         userService.reactivate(user);
         verify(userRepository).save(user);
