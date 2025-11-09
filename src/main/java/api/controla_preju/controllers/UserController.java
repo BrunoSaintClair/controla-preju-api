@@ -1,6 +1,7 @@
 package api.controla_preju.controllers;
 
 import api.controla_preju.dtos.forms.CreateUserForm;
+import api.controla_preju.dtos.forms.UpdatePasswordForm;
 import api.controla_preju.dtos.forms.UpdateUserNameForm;
 import api.controla_preju.dtos.views.CreatedUserView;
 import api.controla_preju.dtos.views.UserDetailsView;
@@ -51,12 +52,19 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping
+    @PatchMapping("/update-name")
     public ResponseEntity<UserDetailsView> updateName(@Valid @RequestBody UpdateUserNameForm form,
                                                       @AuthenticationPrincipal User authenticatedUser) {
         var updatedUser = userService.updateName(authenticatedUser, form.name());
         var response = new UserDetailsView(updatedUser);
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/update-password")
+    public ResponseEntity<Void> updatePassword(@Valid @RequestBody UpdatePasswordForm form,
+                                              @AuthenticationPrincipal User authenticatedUser) {
+        userService.updatePassword(authenticatedUser, form.newPassword());
+        return ResponseEntity.ok().build();
     }
 
 }

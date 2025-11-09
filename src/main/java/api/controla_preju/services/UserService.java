@@ -1,15 +1,12 @@
 package api.controla_preju.services;
 
 import api.controla_preju.dtos.forms.CreateUserForm;
-import api.controla_preju.entities.Email;
 import api.controla_preju.entities.User;
 import api.controla_preju.exceptions.BusinessException;
 import api.controla_preju.repositories.UserRepository;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -66,6 +63,13 @@ public class UserService {
     public User updateName(User user, String newName) {
         user.setName(newName);
         return userRepository.save(user);
+    }
+
+    @Transactional
+    public void updatePassword(User user, String newPassword) {
+        String encryptedPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(encryptedPassword);
+        userRepository.save(user);
     }
 
 }
