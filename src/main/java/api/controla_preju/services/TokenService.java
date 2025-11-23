@@ -13,21 +13,22 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TokenService {
 
     @Value("${api.security.token.secret-key}")
-    private String secretKey;
+    private String SECRET_KEY;
     @Value("${api.security.token.expiration-hours}")
-    private int expirationHours;
+    private int EXPIRATION_HOURS;
     @Value("${api.token.jwt.issuer}")
     private String ISSUER;
 
 
-    public String generateToken(User user){
+    public String generateToken(User user) {
         try {
-            Algorithm algorithm = Algorithm.HMAC256(secretKey);
+            Algorithm algorithm = Algorithm.HMAC256(SECRET_KEY);
             List<String> roles = user.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority)
                     .toList();
@@ -37,27 +38,42 @@ public class TokenService {
                     .withClaim("roles", roles)
                     .withExpiresAt(this.setExpirationTime())
                     .sign(algorithm);
-        } catch (JWTCreationException exception){
+        } catch (JWTCreationException exception) {
             throw new RuntimeException("Erro gerando token. Mensagem da exceção: " + exception.getMessage());
         }
     }
 
-    public String validateToken(String token){
+    public String generateShortTimeToken(User user) {
         try {
-            Algorithm algorithm = Algorithm.HMAC256(secretKey);
+            Algorithm algorithm = Algorithm.HMAC256(SECRET_KEY);
+            return JWT.create()
+                    .withIssuer(ISSUER)
+                    .withSubject(user.getEmail())
+                    .withExpiresAt(LocalDateTime.now()
+                            .plusMinutes(30)
+                            .toInstant(ZoneOffset.of("-03:00")))
+                    .sign(algorithm);
+        } catch (JWTCreationException exception) {
+            throw new RuntimeException("Erro gerando token. Mensagem da exceção: " + exception.getMessage());
+        }
+    }
+
+    public String validateToken(String token) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(SECRET_KEY);
             return JWT.require(algorithm)
                     .withIssuer(ISSUER)
                     .build()
                     .verify(token)
                     .getSubject();
-        } catch (JWTVerificationException exception){
+        } catch (JWTVerificationException exception) {
             return null;
         }
     }
 
-    private Instant setExpirationTime(){
+    private Instant setExpirationTime() {
         return LocalDateTime.now()
-                .plusHours(expirationHours)
+                .plusHours(EXPIRATION_HOURS)
                 .toInstant(ZoneOffset.of("-03:00"));
     }
 

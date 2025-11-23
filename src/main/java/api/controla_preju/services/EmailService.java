@@ -8,6 +8,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class EmailService {
 
@@ -17,6 +19,11 @@ public class EmailService {
     private String confirmEmailRoute;
     @Value("${api.reject.email.route}")
     private String rejectEmailRoute;
+    @Value("${api.confirm.reset-password.email.route}")
+    private String confirmResetEmailRoute;
+    @Value("${api.reject.reset-password.email.route}")
+    private String rejectResetEmailRoute;
+
     private final JavaMailSender mailSender;
     private final TokenService tokenService;
 
@@ -36,9 +43,9 @@ public class EmailService {
 
     @Async
     public void sendRegisterEmail(User newUser){
-        String confirmationToken = tokenService.generateToken(newUser);
-        String confirmationLink = confirmEmailRoute + confirmationToken;
-        String rejectionLink = rejectEmailRoute + confirmationToken;
+        String token = tokenService.generateToken(newUser);
+        String confirmationLink = confirmEmailRoute + token;
+        String rejectionLink = rejectEmailRoute + token;
         String emailBody = String.format("""
         Olá, %s!
 
@@ -54,6 +61,30 @@ public class EmailService {
         var message = new SimpleMailMessage();
         message.setTo(newUser.getEmail());
         message.setSubject("Novo cadastro no ControlaPreju!");
+        message.setText(emailBody);
+        mailSender.send(message);
+    }
+
+    @Async
+    public void sendResetPasswordEmail(User user) {
+        String token = tokenService.generateShortTimeToken(user);
+        String confirmationLink = confirmResetEmailRoute + token;
+        String rejectionLink = rejectResetEmailRoute + token;
+        String emailBody = String.format("""
+        Olá!
+
+        Seu pedido de recuperar senha no ControlaPreju foi recebido. Por favor, confirme clicando no link abaixo:
+        %s
+
+        Se você não fez este pedido, por favor, rejeite clicando aqui:
+        %s
+        
+        Atenciosamente, equipe ControlaPreju.
+        """, confirmationLink, rejectionLink);
+
+        var message = new SimpleMailMessage();
+        message.setTo(user.getEmail());
+        message.setSubject("Recuperação de senha - ControlaPreju");
         message.setText(emailBody);
         mailSender.send(message);
     }

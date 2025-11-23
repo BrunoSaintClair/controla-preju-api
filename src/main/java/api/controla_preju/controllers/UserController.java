@@ -1,13 +1,12 @@
 package api.controla_preju.controllers;
 
-import api.controla_preju.dtos.forms.CreateUserForm;
-import api.controla_preju.dtos.forms.UpdatePasswordForm;
-import api.controla_preju.dtos.forms.UpdateUserNameForm;
+import api.controla_preju.dtos.forms.*;
 import api.controla_preju.dtos.views.CreatedUserView;
 import api.controla_preju.dtos.views.UserDetailsView;
 import api.controla_preju.entities.User;
 import api.controla_preju.services.UserService;
 import jakarta.validation.Valid;
+import lombok.Getter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -42,7 +41,7 @@ public class UserController {
     @PostMapping("/reactivate")
     public ResponseEntity<Void> reactivate(@AuthenticationPrincipal User user) {
         userService.reactivate(user);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
@@ -64,7 +63,14 @@ public class UserController {
     public ResponseEntity<Void> updatePassword(@Valid @RequestBody UpdatePasswordForm form,
                                               @AuthenticationPrincipal User authenticatedUser) {
         userService.updatePassword(authenticatedUser, form.newPassword());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/reset-password")
+    public ResponseEntity<Void> requestResetPassword(@RequestBody ResetPasswordForm form) {
+        userService.requestResetPassword(form.email());
+        return ResponseEntity.noContent().build();
+    }
+
 
 }

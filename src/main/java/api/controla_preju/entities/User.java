@@ -38,8 +38,6 @@ public class User implements UserDetails {
     private LocalDateTime updatedAt;
     @Column(nullable = false)
     private LocalDateTime createdAt;
-    @Column(nullable = false)
-    private Character resetPassword;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Role role;
@@ -51,7 +49,6 @@ public class User implements UserDetails {
         this.status = 'P';
         this.updatedAt = LocalDateTime.now();
         this.createdAt = LocalDateTime.now();
-        this.resetPassword = 'N';
         this.role = Role.USER;
     }
 
@@ -99,10 +96,6 @@ public class User implements UserDetails {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public void setResetPassword(Character resetPassword) {
-        this.resetPassword = resetPassword;
     }
 
 }
