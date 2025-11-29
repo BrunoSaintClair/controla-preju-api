@@ -35,6 +35,10 @@ public class SecurityConfig {
                         authorize -> authorize
                                 .requestMatchers(HttpMethod.POST, "/users").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/auth/confirm-registration").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/auth/reject-registration").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/users/reset-password").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/users/complete-reset-password").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)

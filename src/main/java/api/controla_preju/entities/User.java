@@ -22,7 +22,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class User implements UserDetails {
 
-    @Id @GeneratedValue(strategy = GenerationType.UUID)
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     @Column(nullable = false, unique = true, length = 150)
     private String email;
@@ -45,7 +46,8 @@ public class User implements UserDetails {
         this.email = email;
         this.name = name;
         this.password = password;
-        this.status = 'A';
+        this.status = 'P';
+        this.updatedAt = LocalDateTime.now();
         this.createdAt = LocalDateTime.now();
         this.role = Role.USER;
     }
@@ -90,6 +92,10 @@ public class User implements UserDetails {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
 }

@@ -33,6 +33,10 @@ public class UserRepository {
         return validateUser(jpaRepository.findByEmail(email));
     }
 
+    public Optional<User> findByEmailNoValidation(String email) {
+        return jpaRepository.findByEmail(email);
+    }
+
     public User findById(UUID id){
         return validateUser(jpaRepository.findById(id));
     }
@@ -43,6 +47,10 @@ public class UserRepository {
 
     public User save(User newUser){
         return jpaRepository.save(newUser);
+    }
+
+    public void delete(User user) {
+        jpaRepository.delete(user);
     }
 
 }

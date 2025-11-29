@@ -1,7 +1,6 @@
 package api.controla_preju.controllers;
 
-import api.controla_preju.dtos.forms.CreateUserForm;
-import api.controla_preju.dtos.forms.UpdateUserNameForm;
+import api.controla_preju.dtos.forms.*;
 import api.controla_preju.dtos.views.CreatedUserView;
 import api.controla_preju.dtos.views.UserDetailsView;
 import api.controla_preju.entities.User;
@@ -41,7 +40,7 @@ public class UserController {
     @PostMapping("/reactivate")
     public ResponseEntity<Void> reactivate(@AuthenticationPrincipal User user) {
         userService.reactivate(user);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
@@ -51,12 +50,31 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping
+    @PatchMapping("/update-name")
     public ResponseEntity<UserDetailsView> updateName(@Valid @RequestBody UpdateUserNameForm form,
                                                       @AuthenticationPrincipal User authenticatedUser) {
         var updatedUser = userService.updateName(authenticatedUser, form.name());
         var response = new UserDetailsView(updatedUser);
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/update-password")
+    public ResponseEntity<Void> updatePassword(@Valid @RequestBody UpdatePasswordForm form,
+                                              @AuthenticationPrincipal User authenticatedUser) {
+        userService.updatePassword(authenticatedUser, form.newPassword());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> requestResetPassword(@RequestBody ResetPasswordForm form) {
+        userService.requestResetPassword(form.email());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/complete-reset-password")
+    public ResponseEntity<Void> completeResetPassword(@Valid @RequestBody CompleteResetPasswordForm form) {
+        userService.completePasswordReset(form.token(), form.newPassword());
+        return ResponseEntity.noContent().build();
     }
 
 }
