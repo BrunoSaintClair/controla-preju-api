@@ -47,7 +47,7 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/confirm")
+    @GetMapping("/confirm-registration")
     public ResponseEntity<String> confirmRegistration(@RequestParam("token") String token) {
         String email = tokenService.validateToken(token);
         if (email == null) {
@@ -65,7 +65,7 @@ public class AuthController {
         return ResponseEntity.ok("E-mail já estava confirmado.");
     }
 
-    @GetMapping("/reject")
+    @GetMapping("/reject-registration")
     public ResponseEntity<String> rejectRegistration(@RequestParam("token") String token) {
         String email = tokenService.validateToken(token);
         if (email == null) {
@@ -81,18 +81,6 @@ public class AuthController {
         }
 
         return ResponseEntity.ok("O cadastro não pôde ser rejeitado.");
-    }
-
-    @GetMapping("/reset-password/confirm")
-    public ResponseEntity<String> confirmReset(@RequestParam("token") String token) {
-        String email = tokenService.validateToken(token);
-        return ResponseEntity.ok("Aceito");
-    }
-
-    @GetMapping("/reset-password/reject")
-    public ResponseEntity<String> rejectReset(@RequestParam("token") String token) {
-        String email = tokenService.validateToken(token);
-        return ResponseEntity.ok("Rejeitado");
     }
 
 }

@@ -19,10 +19,8 @@ public class EmailService {
     private String confirmEmailRoute;
     @Value("${api.reject.email.route}")
     private String rejectEmailRoute;
-    @Value("${api.confirm.reset-password.email.route}")
-    private String confirmResetEmailRoute;
-    @Value("${api.reject.reset-password.email.route}")
-    private String rejectResetEmailRoute;
+    @Value("${api.frontend.url}")
+    private String frontendUrl;
 
     private final JavaMailSender mailSender;
     private final TokenService tokenService;
@@ -68,19 +66,17 @@ public class EmailService {
     @Async
     public void sendResetPasswordEmail(User user) {
         String token = tokenService.generateShortTimeToken(user);
-        String confirmationLink = confirmResetEmailRoute + token;
-        String rejectionLink = rejectResetEmailRoute + token;
+        String resetLink = frontendUrl + "/recover-password?token=" + token;
+
         String emailBody = String.format("""
         Olá!
 
-        Seu pedido de recuperar senha no ControlaPreju foi recebido. Por favor, confirme clicando no link abaixo:
+        Recebemos um pedido para recuperar a senha.
+        Clique no link abaixo para criar uma nova senha:
         %s
 
-        Se você não fez este pedido, por favor, rejeite clicando aqui:
-        %s
-        
-        Atenciosamente, equipe ControlaPreju.
-        """, confirmationLink, rejectionLink);
+        Se você não pediu isso, apenas ignore este e-mail e sua senha permanecerá a mesma.
+        """, resetLink);
 
         var message = new SimpleMailMessage();
         message.setTo(user.getEmail());

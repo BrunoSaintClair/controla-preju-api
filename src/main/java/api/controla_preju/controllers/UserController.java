@@ -6,7 +6,6 @@ import api.controla_preju.dtos.views.UserDetailsView;
 import api.controla_preju.entities.User;
 import api.controla_preju.services.UserService;
 import jakarta.validation.Valid;
-import lombok.Getter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -66,11 +65,16 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/reset-password")
+    @PostMapping("/reset-password")
     public ResponseEntity<Void> requestResetPassword(@RequestBody ResetPasswordForm form) {
         userService.requestResetPassword(form.email());
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/complete-reset-password")
+    public ResponseEntity<Void> completeResetPassword(@Valid @RequestBody CompleteResetPasswordForm form) {
+        userService.completePasswordReset(form.token(), form.newPassword());
+        return ResponseEntity.noContent().build();
+    }
 
 }
