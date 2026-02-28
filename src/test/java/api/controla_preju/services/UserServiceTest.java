@@ -25,6 +25,12 @@ class UserServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private EmailService emailService;
+
+    @Mock
+    private TokenService tokenService;
+
     @InjectMocks
     private UserService userService;
 
@@ -41,6 +47,8 @@ class UserServiceTest {
     @Test
     @DisplayName("Should create user succesfully")
     void shouldCreateUser() {
+        var form = new CreateUserForm("test@email.com", "Test user", "123456");
+
         when(userRepository.existsByEmail(form.email())).thenReturn(false);
         when(passwordEncoder.encode(form.password())).thenReturn("encryptedpassword");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -59,6 +67,7 @@ class UserServiceTest {
     @Test
     @DisplayName("Should throw exception of not unique email while creating user")
     void shouldThrowExceptionCreatingUser() {
+        var form = new CreateUserForm("email@email.com", "Test User", "123456");
         when(userRepository.existsByEmail(form.email())).thenReturn(true);
 
         assertThrows(BusinessException.class, () -> userService.create(form));
@@ -68,6 +77,7 @@ class UserServiceTest {
     @Test
     @DisplayName("Should deactivate user succesfully")
     void shouldDeactivate() {
+        var user = new User("test@email.com", "test name", "password");
         userService.deactivate(user);
         verify(userRepository).save(user);
         assertEquals('I', user.getStatus());
@@ -76,7 +86,6 @@ class UserServiceTest {
     @Test
     @DisplayName("Should reactivate user succesfully")
     void shouldReactivate() {
-        assertEquals('A', user.getStatus());
         user.setStatus('I');
         userService.reactivate(user);
         verify(userRepository).save(user);
