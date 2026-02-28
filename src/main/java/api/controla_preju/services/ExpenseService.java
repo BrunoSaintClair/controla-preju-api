@@ -138,7 +138,7 @@ public class ExpenseService {
         if (year.isPresent() && month.isPresent()) {
             return expenseRepository.findAllByAccountIdAndYearAndMonth(accountId, year.get(), month.get());
         }
-        if (year.isEmpty() && month.isEmpty() && day.isEmpty() && paymentMethod.isEmpty() && category.isEmpty()) {
+        if (year.isEmpty() && month.isEmpty() && day.isEmpty()) {
             return expenseRepository.findAllByAccountId(accountId);
         }
         throw new BusinessException("Combinação de filtros inválida ou não suportada.");
