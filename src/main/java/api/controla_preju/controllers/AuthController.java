@@ -7,7 +7,6 @@ import api.controla_preju.exceptions.PasswordOrEmailInvalidException;
 import api.controla_preju.repositories.UserRepository;
 import api.controla_preju.services.TokenService;
 import api.controla_preju.services.UserService;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -54,8 +53,11 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Token inválido ou expirado.");
         }
 
-        User user = userRepository.findByEmailNoValidation(email)
-                .orElseThrow(() -> new EntityNotFoundException("Email não encontrado."));
+        User user = userRepository.findByEmailNoValidation(email).orElse(null);
+
+        if (user == null) {
+            return ResponseEntity.badRequest().body("Token inválido, expirado ou link já utilizado.");
+        }
 
         if (user.getStatus() == 'P') {
             userService.reactivate(user);
@@ -72,8 +74,11 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Token inválido ou expirado.");
         }
 
-        User user = userRepository.findByEmailNoValidation(email)
-                .orElseThrow(() -> new EntityNotFoundException("Email não encontrado."));
+        User user = userRepository.findByEmailNoValidation(email).orElse(null);
+
+        if (user == null) {
+            return ResponseEntity.badRequest().body("Token inválido, expirado ou link já utilizado.");
+        }
 
         if (user.getStatus() == 'P') {
             userRepository.delete(user);

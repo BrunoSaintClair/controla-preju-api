@@ -46,13 +46,13 @@ class AccountServiceTest {
         user = new User("test@email.com", "test name", "password");
         ReflectionTestUtils.setField(user, "id", userId);
 
-        form = new CreateAccountForm("Acc", "Desc", AccountType.INVESTIMENTOS,
+        form = new CreateAccountForm("Acc", "Desc", AccountType.INVESTMENTS,
                 1000L, true);
 
         account = new Account(
                 "Acc",
                 "Desc",
-                AccountType.INVESTIMENTOS,
+                AccountType.INVESTMENTS,
                 1000L,
                 true,
                 user

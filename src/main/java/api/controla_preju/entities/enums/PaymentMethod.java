@@ -5,10 +5,10 @@ import lombok.Getter;
 @Getter
 public enum PaymentMethod {
     PIX("Pix"),
-    DINHEIRO("Dinheiro"),
-    CREDITO("Cartão de crédito"),
-    DEBITO("Cartão de débito"),
-    BOLETO("Boleto");
+    CASH("Dinheiro"),
+    CREDIT_CARD("Cartão de crédito"),
+    DEBIT_CARD("Cartão de débito"),
+    BANK_SLIP("Boleto");
 
     private final String description;
 

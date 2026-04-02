@@ -4,9 +4,9 @@ import lombok.Getter;
 
 @Getter
 public enum RevenueCategory {
-    OUTROS("Outros"),
-    SALARIO("Salário"),
-    INVESTIMENTOS("Investimentos");
+    OTHERS("Outros"),
+    SALARY("Salário"),
+    INVESTMENTS("Investimentos");
 
     private final String description;
 

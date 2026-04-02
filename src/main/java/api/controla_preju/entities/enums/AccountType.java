@@ -4,10 +4,10 @@ import lombok.Getter;
 
 @Getter
 public enum AccountType {
-    CONTA_CORRENTE("Conta corrente"),
-    INVESTIMENTOS("Investimentos"),
-    POUPANCA("Poupança"),
-    CARTEIRA("Carteira");
+    CHECKING_ACCOUNT("Conta corrente"),
+    INVESTMENTS("Investimentos"),
+    SAVINGS_ACCOUNT("Poupança"),
+    WALLET("Carteira");
 
     private final String description;
 

@@ -51,14 +51,14 @@ class RevenueServiceTest {
         user = new User("test@email.com", "User Test", "password");
         ReflectionTestUtils.setField(user, "id", userId);
 
-        account = new Account("Corrente", "Conta principal", AccountType.CONTA_CORRENTE, 1000L, true, user);
+        account = new Account("Corrente", "Conta principal", AccountType.CHECKING_ACCOUNT, 1000L, true, user);
         ReflectionTestUtils.setField(account, "id", UUID.randomUUID());
 
         createForm = new CreateRevenueForm(
                 "Salário",
                 "Recebimento mensal",
                 5000L,
-                RevenueCategory.SALARIO,
+                RevenueCategory.SALARY,
                 LocalDateTime.now(),
                 account.getId()
         );

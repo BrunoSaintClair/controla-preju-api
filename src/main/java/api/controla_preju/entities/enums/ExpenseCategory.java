@@ -4,19 +4,19 @@ import lombok.Getter;
 
 @Getter
 public enum ExpenseCategory {
-    OUTROS("Outros"),
-    INVESTIMENTOS("Investimentos"),
-    MORADIA("Moradia"),
-    TRANSPORTE("Transporte"),
-    ALIMENTACAO("Alimentação"),
-    SUPERMERCADO("Super-mercado"),
-    SAUDE("Saúde"),
-    ROUPAS("Roupas"),
-    APARENCIA("Aparência"),
-    TECNOLOGIA("Tecnologia"),
+    OTHERS("Outros"),
+    INVESTMENTS("Investimentos"),
+    HOUSING("Moradia"),
+    TRANSPORT("Transporte"),
+    FOOD("Alimentação"),
+    GROCERIES("Super-mercado"),
+    HEALTH("Saúde"),
+    CLOTHING("Roupas"),
+    APPEARANCE("Aparência"),
+    TECHNOLOGY("Tecnologia"),
     STREAMING("Streaming"),
-    SERVICOS("Serviços"),
-    DIVIDAS("Dívidas");
+    SERVICES("Serviços"),
+    DEBTS("Dívidas");
 
     private final String description;
 

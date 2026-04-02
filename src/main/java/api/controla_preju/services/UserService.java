@@ -4,7 +4,6 @@ import api.controla_preju.dtos.forms.CreateUserForm;
 import api.controla_preju.entities.User;
 import api.controla_preju.exceptions.BusinessException;
 import api.controla_preju.repositories.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -90,7 +89,7 @@ public class UserService {
         }
 
         User user = userRepository.findByEmailNoValidation(email)
-                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado."));
+                .orElseThrow(() -> new BusinessException("Token de recuperação inválido ou expirado."));
 
         String encryptedPassword = passwordEncoder.encode(newPassword);
         user.setPassword(encryptedPassword);
