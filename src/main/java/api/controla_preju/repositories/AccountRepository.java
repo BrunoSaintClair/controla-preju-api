@@ -4,6 +4,8 @@ import api.controla_preju.dtos.views.TransactionHistoryView;
 import api.controla_preju.entities.Account;
 import api.controla_preju.entities.User;
 import api.controla_preju.repositories.jpa.AccountJpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -47,8 +49,8 @@ public class AccountRepository {
         return jpaRepository.sumBalanceByUserId(userId);
     }
 
-    public List<TransactionHistoryView> getTransactionHistoryByUserId(UUID userId) {
-        return jpaRepository.getTransactionHistoryByUserId(userId);
+    public Page<TransactionHistoryView> getTransactionHistoryByUserId(UUID userId, Pageable pageable) {
+        return jpaRepository.getTransactionHistoryByUserId(userId, pageable);
     }
 
 }

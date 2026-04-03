@@ -14,6 +14,9 @@ import api.controla_preju.services.ExpenseService;
 import api.controla_preju.services.RevenueService;
 import api.controla_preju.services.TransferService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -167,9 +170,10 @@ public class AccountController {
     }
 
     @GetMapping("/transactions")
-    public ResponseEntity<List<TransactionHistoryView>> getTransactionHistory(
-                                                            @AuthenticationPrincipal(expression = "id") UUID userId) {
-        List<TransactionHistoryView> history = accountService.getTransactionHistory(userId);
+    public ResponseEntity<Page<TransactionHistoryView>> getTransactionHistory(
+                                                            @AuthenticationPrincipal(expression = "id") UUID userId,
+                                                            @PageableDefault(size = 20) Pageable pageable) {
+        Page<TransactionHistoryView> history = accountService.getTransactionHistory(userId, pageable);
         return ResponseEntity.ok(history);
     }
 
