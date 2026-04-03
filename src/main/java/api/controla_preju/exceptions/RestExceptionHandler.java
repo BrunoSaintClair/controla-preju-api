@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.util.List;
@@ -16,9 +18,13 @@ import java.util.List;
 @ControllerAdvice
 public class RestExceptionHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(RestExceptionHandler.class);
+
     @ExceptionHandler(Exception.class)
     private ResponseEntity<DefaultErrorResponse> handleGenericException(Exception exception,
                                                                         HttpServletRequest request) {
+        log.error("Erro interno não tratado na rota: {}", request.getRequestURI(), exception);
+
         DefaultErrorResponse response = new DefaultErrorResponse(
                 Instant.now(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
@@ -91,6 +97,5 @@ public class RestExceptionHandler {
         );
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
-
 
 }
