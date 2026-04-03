@@ -98,4 +98,16 @@ public class RestExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
+    @ExceptionHandler(RateLimitExceededException.class)
+    private ResponseEntity<DefaultErrorResponse> handleRateLimitException(RateLimitExceededException exception,
+                                                                          HttpServletRequest request) {
+        DefaultErrorResponse response = new DefaultErrorResponse(
+                Instant.now(),
+                HttpStatus.TOO_MANY_REQUESTS.value(),
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(response);
+    }
+
 }
