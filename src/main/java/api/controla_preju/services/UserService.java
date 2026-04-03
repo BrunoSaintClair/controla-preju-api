@@ -2,6 +2,7 @@ package api.controla_preju.services;
 
 import api.controla_preju.dtos.forms.CreateUserForm;
 import api.controla_preju.entities.User;
+import api.controla_preju.entities.enums.UserStatus;
 import api.controla_preju.exceptions.BusinessException;
 import api.controla_preju.repositories.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -52,13 +53,13 @@ public class UserService {
 
     @Transactional
     public void deactivate(User user) {
-        user.setStatus('I');
+        user.setStatus(UserStatus.INACTIVE);
         userRepository.save(user);
     }
 
     @Transactional
     public void reactivate(User user) {
-        user.setStatus('A');
+        user.setStatus(UserStatus.ACTIVE);
         userRepository.save(user);
     }
 
@@ -93,7 +94,7 @@ public class UserService {
 
         String encryptedPassword = passwordEncoder.encode(newPassword);
         user.setPassword(encryptedPassword);
-        if (user.getStatus() != 'A') user.setStatus('A');
+        if (user.getStatus() != UserStatus.ACTIVE) user.setStatus(UserStatus.ACTIVE);
         userRepository.save(user);
     }
 

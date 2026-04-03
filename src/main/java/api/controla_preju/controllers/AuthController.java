@@ -3,6 +3,7 @@ package api.controla_preju.controllers;
 import api.controla_preju.dtos.forms.LoginForm;
 import api.controla_preju.dtos.views.LoginView;
 import api.controla_preju.entities.User;
+import api.controla_preju.entities.enums.UserStatus;
 import api.controla_preju.exceptions.PasswordOrEmailInvalidException;
 import api.controla_preju.repositories.UserRepository;
 import api.controla_preju.services.TokenService;
@@ -59,7 +60,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Token inválido, expirado ou link já utilizado.");
         }
 
-        if (user.getStatus() == 'P') {
+        if (user.getStatus() == UserStatus.PENDING) {
             userService.reactivate(user);
             return ResponseEntity.ok("E-mail confirmado com sucesso! Pode fazer login.");
         }
@@ -80,7 +81,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Token inválido, expirado ou link já utilizado.");
         }
 
-        if (user.getStatus() == 'P') {
+        if (user.getStatus() == UserStatus.PENDING) {
             userRepository.delete(user);
             return ResponseEntity.ok("Cadastro rejeitado com sucesso.");
         }

@@ -1,6 +1,7 @@
 package api.controla_preju.entities;
 
 import api.controla_preju.entities.enums.Role;
+import api.controla_preju.entities.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,8 +32,9 @@ public class User implements UserDetails {
     private String name;
     @Column(nullable = false, length = 100)
     private String password;
-    @Column(nullable = false, length = 1)
-    private Character status;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private UserStatus status;
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
@@ -46,7 +48,7 @@ public class User implements UserDetails {
         this.email = email;
         this.name = name;
         this.password = password;
-        this.status = 'P';
+        this.status = UserStatus.PENDING;
         this.updatedAt = LocalDateTime.now();
         this.createdAt = LocalDateTime.now();
         this.role = Role.USER;
@@ -83,10 +85,10 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return this.status == 'A';
+        return this.status == UserStatus.ACTIVE;
     }
 
-    public void setStatus(Character status) {
+    public void setStatus(UserStatus status) {
         this.status = status;
     }
 

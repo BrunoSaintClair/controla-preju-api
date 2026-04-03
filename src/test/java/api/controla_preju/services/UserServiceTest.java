@@ -2,6 +2,7 @@ package api.controla_preju.services;
 
 import api.controla_preju.dtos.forms.CreateUserForm;
 import api.controla_preju.entities.User;
+import api.controla_preju.entities.enums.UserStatus;
 import api.controla_preju.exceptions.BusinessException;
 import api.controla_preju.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -76,17 +77,17 @@ class UserServiceTest {
     void shouldDeactivate() {
         userService.deactivate(user);
         verify(userRepository).save(user);
-        assertEquals('I', user.getStatus());
+        assertEquals(UserStatus.INACTIVE, user.getStatus());
     }
 
     @Test
     @DisplayName("Should reactivate user succesfully")
     void shouldReactivate() {
-        assertEquals('P', user.getStatus());
-        user.setStatus('I');
+        assertEquals(UserStatus.PENDING, user.getStatus());
+        user.setStatus(UserStatus.INACTIVE);
         userService.reactivate(user);
         verify(userRepository).save(user);
-        assertEquals('A', user.getStatus());
+        assertEquals(UserStatus.ACTIVE, user.getStatus());
     }
 
 }
