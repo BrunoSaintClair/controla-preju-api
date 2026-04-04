@@ -8,6 +8,7 @@ import api.controla_preju.entities.User;
 import api.controla_preju.entities.enums.AccountType;
 import api.controla_preju.entities.enums.ExpenseCategory;
 import api.controla_preju.entities.enums.PaymentMethod;
+import api.controla_preju.entities.enums.TransactionStatus;
 import api.controla_preju.exceptions.AuthorizationException;
 import api.controla_preju.exceptions.BusinessException;
 import api.controla_preju.repositories.ExpenseRepository;
@@ -62,6 +63,7 @@ class ExpenseServiceTest {
                 ExpenseCategory.GROCERIES,
                 PaymentMethod.DEBIT_CARD,
                 LocalDateTime.now(),
+                TransactionStatus.COMPLETED,
                 account.getId()
         );
 
@@ -72,6 +74,7 @@ class ExpenseServiceTest {
                 createForm.paymentMethod(),
                 createForm.category(),
                 createForm.createdAt(),
+                createForm.status(),
                 account
         );
         ReflectionTestUtils.setField(expense, "id", UUID.randomUUID());
@@ -160,7 +163,7 @@ class ExpenseServiceTest {
     void shouldUpdateExpenseAmountSuccessfully() {
         account.setBalanceInCents(1500L);
 
-        UpdateExpenseForm updateForm = new UpdateExpenseForm(null, null, 800L, null, null, null);
+        UpdateExpenseForm updateForm = new UpdateExpenseForm(null, null, 800L, null, null, null, null);
         when(expenseRepository.save(any(Expense.class))).thenReturn(expense);
 
         expenseService.update(expense, updateForm);
@@ -173,7 +176,7 @@ class ExpenseServiceTest {
     @Test
     @DisplayName("Should throw exception when update results in negative balance")
     void shouldThrowExceptionWhenUpdateExceedsBalance() {
-        UpdateExpenseForm updateForm = new UpdateExpenseForm(null, null, 3000L, null, null, null);
+        UpdateExpenseForm updateForm = new UpdateExpenseForm(null, null, 3000L, null, null, null, null);
 
         assertThrows(BusinessException.class, () -> expenseService.update(expense, updateForm));
         verify(expenseRepository, never()).save(any());

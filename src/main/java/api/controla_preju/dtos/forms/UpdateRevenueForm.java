@@ -1,6 +1,7 @@
 package api.controla_preju.dtos.forms;
 
 import api.controla_preju.entities.enums.RevenueCategory;
+import api.controla_preju.entities.enums.TransactionStatus;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
@@ -18,6 +19,8 @@ public record UpdateRevenueForm(
 
         RevenueCategory category,
 
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+
+        TransactionStatus status
 ) {
 }

@@ -7,11 +7,11 @@ import api.controla_preju.entities.Expense;
 import api.controla_preju.entities.User;
 import api.controla_preju.entities.enums.ExpenseCategory;
 import api.controla_preju.entities.enums.PaymentMethod;
+import api.controla_preju.entities.enums.TransactionStatus;
 import api.controla_preju.exceptions.AuthorizationException;
 import api.controla_preju.exceptions.BusinessException;
 import api.controla_preju.repositories.ExpenseRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,8 +49,11 @@ public class ExpenseService {
 
         Account account = accountService.findById(form.accountId(), owner.getId());
 
-        if (account.getBalanceInCents() < form.amountInCents()) {
-            throw new BusinessException("Saldo insuficiente para registrar a despesa.");
+        if (form.status() == TransactionStatus.COMPLETED) {
+            if (account.getBalanceInCents() < form.amountInCents()) {
+                throw new BusinessException("Saldo insuficiente para registrar a despesa.");
+            }
+            account.setBalanceInCents(account.getBalanceInCents() - form.amountInCents());
         }
 
         Expense expense = new Expense(
@@ -60,23 +63,27 @@ public class ExpenseService {
                 form.paymentMethod(),
                 form.category(),
                 form.createdAt(),
+                form.status(),
                 account
         );
 
-        account.setBalanceInCents(account.getBalanceInCents() - form.amountInCents());
         return expenseRepository.save(expense);
     }
 
     @Transactional
     public void delete(Expense expense) {
-        Account account = expense.getAccount();
-        account.setBalanceInCents(account.getBalanceInCents() + expense.getAmountInCents());
+        if (expense.getStatus() == TransactionStatus.COMPLETED) {
+            Account account = expense.getAccount();
+            account.setBalanceInCents(account.getBalanceInCents() + expense.getAmountInCents());
+        }
         expenseRepository.delete(expense);
     }
 
     @Transactional
     public Expense update(Expense expense, UpdateExpenseForm form) {
         Account account = expense.getAccount();
+
+        TransactionStatus oldStatus = expense.getStatus();
         long oldAmount = expense.getAmountInCents();
 
         if (form.title() != null) {
@@ -95,16 +102,20 @@ public class ExpenseService {
         if (form.paymentMethod() != null) expense.setPaymentMethod(form.paymentMethod());
         if (form.category() != null) expense.setCategory(form.category());
         if (form.createdAt() != null) expense.setCreatedAt(form.createdAt());
+        if (form.status() != null) expense.setStatus(form.status());
 
-        long newAmount = expense.getAmountInCents();
-        long difference = newAmount - oldAmount;
+        long effectiveOldImpact = (oldStatus == TransactionStatus.COMPLETED) ? oldAmount : 0;
+        long effectiveNewImpact = (expense.getStatus() == TransactionStatus.COMPLETED) ? expense.getAmountInCents() : 0;
 
-        long newBalance = account.getBalanceInCents() - difference;
-        if (newBalance < 0) {
-            throw new BusinessException("Saldo insuficiente para atualizar o valor da despesa.");
+        long differenceToSubtract = effectiveNewImpact - effectiveOldImpact;
+
+        if (differenceToSubtract != 0) {
+            long newBalance = account.getBalanceInCents() - differenceToSubtract;
+            if (newBalance < 0) {
+                throw new BusinessException("Saldo insuficiente para efetivar a despesa.");
+            }
+            account.setBalanceInCents(newBalance);
         }
-
-        account.setBalanceInCents(account.getBalanceInCents() - difference);
 
         return expenseRepository.save(expense);
     }

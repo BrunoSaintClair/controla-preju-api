@@ -2,6 +2,7 @@ package api.controla_preju.dtos.forms;
 
 import api.controla_preju.entities.enums.ExpenseCategory;
 import api.controla_preju.entities.enums.PaymentMethod;
+import api.controla_preju.entities.enums.TransactionStatus;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -30,6 +31,9 @@ public record CreateExpenseForm(
 
         @NotNull(message = "A data de criação não pode ser nula.")
         LocalDateTime createdAt,
+
+        @NotNull(message = "O status da transação não pode ser nulo.")
+        TransactionStatus status,
 
         @NotNull(message = "O ID da conta não pode ser nulo.")
         UUID accountId

@@ -6,6 +6,7 @@ import api.controla_preju.entities.Account;
 import api.controla_preju.entities.Revenue;
 import api.controla_preju.entities.User;
 import api.controla_preju.entities.enums.RevenueCategory;
+import api.controla_preju.entities.enums.TransactionStatus;
 import api.controla_preju.exceptions.AuthorizationException;
 import api.controla_preju.exceptions.BusinessException;
 import api.controla_preju.repositories.RevenueRepository;
@@ -16,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 
 @Service
 public class RevenueService {
@@ -51,29 +51,37 @@ public class RevenueService {
 
         Account account = accountService.findById(form.accountId(), owner.getId());
 
+        if (form.status() == TransactionStatus.COMPLETED) {
+            account.setBalanceInCents(account.getBalanceInCents() + form.amountInCents());
+        }
+
         Revenue revenue = new Revenue(
                 form.title(),
                 form.description(),
                 form.amountInCents(),
                 form.category(),
                 form.createdAt(),
+                form.status(),
                 account
         );
 
-        account.setBalanceInCents(account.getBalanceInCents() + revenue.getAmountInCents());
         return revenueRepository.save(revenue);
     }
 
     @Transactional
     public void delete(Revenue revenue) {
-        Account account = revenue.getAccount();
-        account.setBalanceInCents(account.getBalanceInCents() - revenue.getAmountInCents());
+        if (revenue.getStatus() == TransactionStatus.COMPLETED) {
+            Account account = revenue.getAccount();
+            account.setBalanceInCents(account.getBalanceInCents() - revenue.getAmountInCents());
+        }
         revenueRepository.delete(revenue);
     }
 
     @Transactional
     public Revenue update(Revenue revenue, UpdateRevenueForm form) {
         Account account = revenue.getAccount();
+
+        TransactionStatus oldStatus = revenue.getStatus();
         long oldAmount = revenue.getAmountInCents();
 
         if (form.title() != null) {
@@ -91,10 +99,13 @@ public class RevenueService {
         if (form.category() != null) revenue.setCategory(form.category());
         if (form.createdAt() != null) revenue.setCreatedAt(form.createdAt());
         if (form.amountInCents() != null) revenue.setAmountInCents(form.amountInCents());
+        if (form.status() != null) revenue.setStatus(form.status());
 
-        long newAmount = revenue.getAmountInCents();
-        long difference = newAmount - oldAmount;
-        account.setBalanceInCents(account.getBalanceInCents() + difference);
+        long effectiveOldImpact = (oldStatus == TransactionStatus.COMPLETED) ? oldAmount : 0;
+        long effectiveNewImpact = (revenue.getStatus() == TransactionStatus.COMPLETED) ? revenue.getAmountInCents() : 0;
+        long differenceToAdd = effectiveNewImpact - effectiveOldImpact;
+
+        account.setBalanceInCents(account.getBalanceInCents() + differenceToAdd);
 
         return revenueRepository.save(revenue);
     }
@@ -126,6 +137,5 @@ public class RevenueService {
 
         throw new BusinessException("Combinação de filtros inválida ou não suportada.");
     }
-
 
 }

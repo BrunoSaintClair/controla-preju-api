@@ -7,6 +7,7 @@ import api.controla_preju.entities.Revenue;
 import api.controla_preju.entities.User;
 import api.controla_preju.entities.enums.AccountType;
 import api.controla_preju.entities.enums.RevenueCategory;
+import api.controla_preju.entities.enums.TransactionStatus;
 import api.controla_preju.exceptions.AuthorizationException;
 import api.controla_preju.exceptions.BusinessException;
 import api.controla_preju.repositories.RevenueRepository;
@@ -60,6 +61,7 @@ class RevenueServiceTest {
                 5000L,
                 RevenueCategory.SALARY,
                 LocalDateTime.now(),
+                TransactionStatus.COMPLETED,
                 account.getId()
         );
 
@@ -69,6 +71,7 @@ class RevenueServiceTest {
                 createForm.amountInCents(),
                 createForm.category(),
                 createForm.createdAt(),
+                createForm.status(),
                 account
         );
         ReflectionTestUtils.setField(revenue, "id", UUID.randomUUID());
@@ -140,7 +143,7 @@ class RevenueServiceTest {
     @Test
     @DisplayName("Should update amount and adjust account balance correctly")
     void shouldUpdateRevenueAmount() {
-        UpdateRevenueForm updateForm = new UpdateRevenueForm(null, null, 7000L, null, null);
+        UpdateRevenueForm updateForm = new UpdateRevenueForm(null, null, 7000L, null, null, null);
 
         when(revenueRepository.save(any(Revenue.class))).thenReturn(revenue);
 

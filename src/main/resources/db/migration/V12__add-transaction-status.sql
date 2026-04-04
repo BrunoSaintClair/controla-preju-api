@@ -1,0 +1,8 @@
+ALTER TABLE expenses ADD COLUMN status VARCHAR(30);
+ALTER TABLE revenues ADD COLUMN status VARCHAR(30);
+
+UPDATE expenses SET status = 'COMPLETED';
+UPDATE revenues SET status = 'COMPLETED';
+
+ALTER TABLE expenses ALTER COLUMN status SET NOT NULL;
+ALTER TABLE revenues ALTER COLUMN status SET NOT NULL;

@@ -1,6 +1,7 @@
 package api.controla_preju.entities;
 
 import api.controla_preju.entities.enums.RevenueCategory;
+import api.controla_preju.entities.enums.TransactionStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,16 +29,20 @@ public class Revenue {
     private RevenueCategory category;
     @Column(nullable = false)
     private LocalDateTime createdAt;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private TransactionStatus status;
     @ManyToOne
     private Account account;
 
     public Revenue(String title, String description, long amountInCents, RevenueCategory category,
-                   LocalDateTime createdAt, Account account) {
+                   LocalDateTime createdAt, TransactionStatus status, Account account) {
         this.title = title;
         this.description = description;
         this.amountInCents = amountInCents;
         this.category = category;
         this.createdAt = createdAt;
+        this.status = status;
         this.account = account;
     }
 
@@ -59,6 +64,10 @@ public class Revenue {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public void setStatus(TransactionStatus status) {
+        this.status = status;
     }
 
 }
