@@ -76,4 +76,9 @@ public class ExpenseRepository {
         return expenseJpaRepository.findAllByStatusAndAutomaticDebitTrueAndCreatedAtBefore(status, dateTime);
     }
 
+    public List<Expense> findAllByStatusAndAutomaticDebitFalseAndCreatedAtBefore(TransactionStatus status,
+                                                                                 LocalDateTime dateTime) {
+        return expenseJpaRepository.findAllByStatusAndAutomaticDebitFalseAndCreatedAtBefore(status, dateTime);
+    }
+
 }

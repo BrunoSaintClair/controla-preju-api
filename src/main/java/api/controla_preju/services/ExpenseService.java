@@ -23,7 +23,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.time.LocalDateTime;
 import java.util.*;
 
-
 @Service
 public class ExpenseService {
 
@@ -63,6 +62,10 @@ public class ExpenseService {
             throw new BusinessException("Uma despesa com exatamente os mesmos dados já foi registrada.");
         }
 
+        if (form.status() == TransactionStatus.COMPLETED && form.createdAt().isAfter(LocalDateTime.now().plusMinutes(2))) {
+            throw new BusinessException("Transações com data futura devem ser registradas como PENDENTES.");
+        }
+
         Account account = accountService.findById(form.accountId(), owner.getId());
 
         if (form.status() == TransactionStatus.COMPLETED) {
@@ -83,7 +86,6 @@ public class ExpenseService {
                 throw new BusinessException("Contas do tipo Carteira não suportam débito automático.");
             }
         }
-
 
         Expense expense = new Expense(
                 form.title(),
@@ -134,6 +136,10 @@ public class ExpenseService {
         if (form.createdAt() != null) expense.setCreatedAt(form.createdAt());
         if (form.status() != null) expense.setStatus(form.status());
         if (form.automaticDebit() != null) expense.setAutomaticDebit(form.automaticDebit());
+
+        if (expense.getStatus() == TransactionStatus.COMPLETED && expense.getCreatedAt().isAfter(LocalDateTime.now().plusMinutes(2))) {
+            throw new BusinessException("Transações com data futura devem ser registradas como PENDENTES.");
+        }
 
         if (oldStatus == TransactionStatus.COMPLETED
                 && form.automaticDebit() != null

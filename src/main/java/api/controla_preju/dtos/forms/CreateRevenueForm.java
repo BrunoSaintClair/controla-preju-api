@@ -31,7 +31,10 @@ public record CreateRevenueForm(
         @NotNull(message = "O status da transação não pode ser nulo.")
         TransactionStatus status,
 
-        @NotNull(message = "O ID da conta não pode ser nulo.")
+        @NotNull(message = "O campo de automação não pode ser nulo.")
+        Boolean automaticProcess,
+
+        @NotNull(message = "O id da conta não pode ser nulo.")
         UUID accountId
 ) {
 }

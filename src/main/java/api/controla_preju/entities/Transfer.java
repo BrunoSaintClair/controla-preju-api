@@ -1,5 +1,6 @@
 package api.controla_preju.entities;
 
+import api.controla_preju.entities.enums.TransactionStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,17 +25,24 @@ public class Transfer {
     private long amountInCents;
     @Column(nullable = false)
     private LocalDateTime createdAt;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private TransactionStatus status;
+    @Column(nullable = false)
+    private boolean automaticProcess;
     @ManyToOne
     private Account sourceAccount;
     @ManyToOne
     private Account destinationAccount;
 
     public Transfer(String title, String description, long amountInCents, LocalDateTime createdAt,
-                    Account sourceAccount, Account destinationAccount) {
+                    TransactionStatus status, boolean automaticProcess, Account sourceAccount, Account destinationAccount) {
         this.title = title;
         this.description = description;
         this.amountInCents = amountInCents;
         this.createdAt = createdAt;
+        this.status = status;
+        this.automaticProcess = automaticProcess;
         this.sourceAccount = sourceAccount;
         this.destinationAccount = destinationAccount;
     }
@@ -53,6 +61,14 @@ public class Transfer {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public void setStatus(TransactionStatus status) {
+        this.status = status;
+    }
+
+    public void setAutomaticProcess(boolean automaticProcess) {
+        this.automaticProcess = automaticProcess;
     }
 
 }

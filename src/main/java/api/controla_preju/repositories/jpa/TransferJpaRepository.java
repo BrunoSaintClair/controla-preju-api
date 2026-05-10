@@ -1,6 +1,7 @@
 package api.controla_preju.repositories.jpa;
 
 import api.controla_preju.entities.Transfer;
+import api.controla_preju.entities.enums.TransactionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -44,4 +45,5 @@ public interface TransferJpaRepository extends JpaRepository<Transfer, UUID> {
             String title, LocalDateTime createdAt, long amountInCents
     );
 
+    List<Transfer> findAllByStatusAndAutomaticProcessTrueAndCreatedAtBefore(TransactionStatus status, LocalDateTime dateTime);
 }

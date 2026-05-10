@@ -1,5 +1,6 @@
 package api.controla_preju.dtos.forms;
 
+import api.controla_preju.entities.enums.TransactionStatus;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -22,6 +23,12 @@ public record CreateTransferForm(
 
         @NotNull(message = "A data de criação não pode ser nula.")
         LocalDateTime createdAt,
+
+        @NotNull(message = "O status da transação não pode ser nulo.")
+        TransactionStatus status,
+
+        @NotNull(message = "O campo de automação não pode ser nulo.")
+        Boolean automaticProcess,
 
         @NotNull(message = "O id da conta de origem não pode ser nula.")
         UUID sourceAccountId,

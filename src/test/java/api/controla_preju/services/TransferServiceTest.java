@@ -6,8 +6,10 @@ import api.controla_preju.entities.Account;
 import api.controla_preju.entities.Transfer;
 import api.controla_preju.entities.User;
 import api.controla_preju.entities.enums.AccountType;
+import api.controla_preju.entities.enums.TransactionStatus;
 import api.controla_preju.exceptions.AuthorizationException;
 import api.controla_preju.exceptions.BusinessException;
+import api.controla_preju.repositories.AccountRepository;
 import api.controla_preju.repositories.TransferRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,8 +19,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.SimpleTransactionStatus;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,6 +40,12 @@ class TransferServiceTest {
     private UserService userService;
     @Mock
     private AccountService accountService;
+    @Mock
+    private AccountRepository accountRepository;
+    @Mock
+    private EmailService emailService;
+    @Mock
+    private PlatformTransactionManager transactionManager;
 
     @InjectMocks
     private TransferService transferService;
@@ -63,6 +74,8 @@ class TransferServiceTest {
                 "Transferência mensal",
                 1000L,
                 LocalDateTime.now(),
+                TransactionStatus.COMPLETED,
+                Boolean.FALSE,
                 sourceAccount.getId(),
                 destinationAccount.getId()
         );
@@ -72,6 +85,8 @@ class TransferServiceTest {
                 createForm.description(),
                 createForm.amountInCents(),
                 createForm.createdAt(),
+                createForm.status(),
+                createForm.automaticProcess(),
                 sourceAccount,
                 destinationAccount
         );
@@ -95,6 +110,27 @@ class TransferServiceTest {
     }
 
     @Test
+    @DisplayName("Should throw exception when creating automatic transfer for WALLET account")
+    void shouldThrowExceptionWhenCreatingAutomaticTransferForWallet() {
+        sourceAccount.setType(AccountType.WALLET);
+        CreateTransferForm walletForm = new CreateTransferForm(
+                "Pix", "Desc", 1000L, LocalDateTime.now().plusDays(1),
+                TransactionStatus.PENDING, Boolean.TRUE,
+                sourceAccount.getId(), destinationAccount.getId()
+        );
+
+        when(accountService.findById(sourceAccount.getId(), userId)).thenReturn(sourceAccount);
+        when(accountService.findById(destinationAccount.getId(), userId)).thenReturn(destinationAccount);
+
+        BusinessException exception = assertThrows(BusinessException.class, () ->
+                transferService.create(walletForm, userId)
+        );
+
+        assertEquals("Contas do tipo Carteira não suportam transferências automáticas.", exception.getMessage());
+        verify(transferRepository, never()).save(any());
+    }
+
+    @Test
     @DisplayName("Should throw exception when transfer is duplicate")
     void shouldThrowExceptionWhenTransferIsDuplicate() {
         when(transferRepository.existsDuplicate(anyString(), any(), anyLong())).thenReturn(true);
@@ -108,6 +144,7 @@ class TransferServiceTest {
     void shouldThrowExceptionWhenAccountsAreSame() {
         CreateTransferForm sameAccountForm = new CreateTransferForm(
                 "Erro", "Mesma conta", 100L, LocalDateTime.now(),
+                TransactionStatus.COMPLETED, Boolean.FALSE,
                 sourceAccount.getId(), sourceAccount.getId()
         );
 
@@ -148,11 +185,12 @@ class TransferServiceTest {
         verify(transferRepository).delete(transfer);
     }
 
-
     @Test
     @DisplayName("Should update amount and adjust balances correctly")
     void shouldUpdateTransferAmount() {
-        UpdateTransferForm updateForm = new UpdateTransferForm(null, null, 1500L, null);
+        UpdateTransferForm updateForm = new UpdateTransferForm(null, null, 1500L,
+                null, null, null
+        );
 
         when(transferRepository.save(any(Transfer.class))).thenReturn(transfer);
 
@@ -161,6 +199,28 @@ class TransferServiceTest {
         assertEquals(1500L, sourceAccount.getBalanceInCents());
         assertEquals(1000L, destinationAccount.getBalanceInCents());
         verify(transferRepository).save(transfer);
+    }
+
+    @Test
+    @DisplayName("Should process automatic transfers and send email on failure")
+    void shouldFailAutomaticTransferAndSendEmail() {
+        transfer.setStatus(TransactionStatus.PENDING);
+        transfer.setAutomaticProcess(true);
+
+        when(transferRepository.findAllByStatusAndAutomaticProcessTrueAndCreatedAtBefore(eq(TransactionStatus.PENDING), any(LocalDateTime.class)))
+                .thenReturn(List.of(transfer));
+
+        when(transactionManager.getTransaction(any())).thenReturn(new SimpleTransactionStatus());
+
+        when(accountRepository.subtractBalanceIfSufficient(sourceAccount.getId(), transfer.getAmountInCents())).thenReturn(0);
+
+        transferService.processAutomaticTransfers();
+
+        assertEquals(TransactionStatus.FAILED, transfer.getStatus());
+        assertFalse(transfer.isAutomaticProcess());
+
+        verify(transferRepository).save(transfer);
+        verify(emailService).sendFailedAutomaticTransfersEmail(user, List.of(transfer));
     }
 
 }

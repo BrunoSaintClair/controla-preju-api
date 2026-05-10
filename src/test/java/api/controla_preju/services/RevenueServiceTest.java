@@ -62,6 +62,7 @@ class RevenueServiceTest {
                 RevenueCategory.SALARY,
                 LocalDateTime.now(),
                 TransactionStatus.COMPLETED,
+                Boolean.FALSE,
                 account.getId()
         );
 
@@ -72,6 +73,7 @@ class RevenueServiceTest {
                 createForm.category(),
                 createForm.createdAt(),
                 createForm.status(),
+                createForm.automaticProcess(),
                 account
         );
         ReflectionTestUtils.setField(revenue, "id", UUID.randomUUID());
@@ -143,7 +145,10 @@ class RevenueServiceTest {
     @Test
     @DisplayName("Should update amount and adjust account balance correctly")
     void shouldUpdateRevenueAmount() {
-        UpdateRevenueForm updateForm = new UpdateRevenueForm(null, null, 7000L, null, null, null);
+        UpdateRevenueForm updateForm = new UpdateRevenueForm(
+                null, null, 7000L,
+                null, null, null, null
+        );
 
         when(revenueRepository.save(any(Revenue.class))).thenReturn(revenue);
 

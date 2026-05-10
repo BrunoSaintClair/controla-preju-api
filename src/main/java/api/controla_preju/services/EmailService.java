@@ -2,6 +2,7 @@ package api.controla_preju.services;
 
 import api.controla_preju.entities.Email;
 import api.controla_preju.entities.Expense;
+import api.controla_preju.entities.Transfer;
 import api.controla_preju.entities.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -116,5 +117,32 @@ public class EmailService {
         mailSender.send(message);
     }
 
-}
+    @Async
+    public void sendFailedAutomaticTransfersEmail(User user, List<Transfer> failedTransfers) {
+        StringBuilder transfersList = new StringBuilder();
+        for (Transfer transfer : failedTransfers) {
+            double amountInReais = transfer.getAmountInCents() / 100.0;
+            transfersList.append(String.format("- %s (Para: %s): R$ %.2f\n",
+                    transfer.getTitle(), transfer.getDestinationAccount().getName(), amountInReais));
+        }
 
+        String emailBody = String.format("""
+        Olá, %s!
+
+        Aviso importante: Não foi possível realizar as seguintes transferências automáticas devido a saldo insuficiente na conta de origem no momento da execução:
+        
+        %s
+        O processamento automático destas transferências foi desativado. Por favor, acesse o sistema, regularize seu saldo e realize a transferência manualmente.
+        
+        Atenciosamente, equipe ControlaPreju.
+        """, user.getName(), transfersList.toString());
+
+        var message = new SimpleMailMessage();
+        message.setFrom(from);
+        message.setTo(user.getEmail());
+        message.setSubject("Falha na Transferência Automática - ControlaPreju");
+        message.setText(emailBody);
+        mailSender.send(message);
+    }
+
+}

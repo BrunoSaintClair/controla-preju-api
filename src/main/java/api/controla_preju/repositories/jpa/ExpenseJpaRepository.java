@@ -54,4 +54,8 @@ public interface ExpenseJpaRepository extends JpaRepository<Expense, UUID> {
             TransactionStatus status, LocalDateTime dateTime
     );
 
+    List<Expense> findAllByStatusAndAutomaticDebitFalseAndCreatedAtBefore(
+            TransactionStatus status, LocalDateTime dateTime
+    );
+
 }

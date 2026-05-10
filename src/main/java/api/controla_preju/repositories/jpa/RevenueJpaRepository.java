@@ -2,6 +2,7 @@ package api.controla_preju.repositories.jpa;
 
 import api.controla_preju.entities.Revenue;
 import api.controla_preju.entities.enums.RevenueCategory;
+import api.controla_preju.entities.enums.TransactionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -42,4 +43,5 @@ public interface RevenueJpaRepository extends JpaRepository<Revenue, UUID> {
             String title, LocalDateTime createdAt, long amountInCents, RevenueCategory category
     );
 
+    List<Revenue> findAllByStatusAndAutomaticProcessTrueAndCreatedAtBefore(TransactionStatus status, LocalDateTime dateTime);
 }

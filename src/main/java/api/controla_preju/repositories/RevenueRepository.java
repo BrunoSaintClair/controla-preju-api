@@ -2,6 +2,7 @@ package api.controla_preju.repositories;
 
 import api.controla_preju.entities.Revenue;
 import api.controla_preju.entities.enums.RevenueCategory;
+import api.controla_preju.entities.enums.TransactionStatus;
 import api.controla_preju.repositories.jpa.RevenueJpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -59,6 +60,10 @@ public class RevenueRepository {
         return revenueJpaRepository.existsByTitleAndCreatedAtAndAmountInCentsAndCategory(
                 title, createdAt, amountInCents, category
         );
+    }
+
+    public List<Revenue> findAllByStatusAndAutomaticProcessTrueAndCreatedAtBefore(TransactionStatus status, LocalDateTime dateTime) {
+        return revenueJpaRepository.findAllByStatusAndAutomaticProcessTrueAndCreatedAtBefore(status, dateTime);
     }
 
 }

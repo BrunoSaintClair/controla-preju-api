@@ -1,6 +1,7 @@
 package api.controla_preju.repositories;
 
 import api.controla_preju.entities.Transfer;
+import api.controla_preju.entities.enums.TransactionStatus;
 import api.controla_preju.repositories.jpa.TransferJpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -54,6 +55,10 @@ public class TransferRepository {
         return transferJpaRepository.existsByTitleAndCreatedAtAndAmountInCents(
                 title, createdAt, amountInCents
         );
+    }
+
+    public List<Transfer> findAllByStatusAndAutomaticProcessTrueAndCreatedAtBefore(TransactionStatus status, LocalDateTime dateTime) {
+        return transferJpaRepository.findAllByStatusAndAutomaticProcessTrueAndCreatedAtBefore(status, dateTime);
     }
 
 }

@@ -32,17 +32,20 @@ public class Revenue {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private TransactionStatus status;
+    @Column(nullable = false)
+    private boolean automaticProcess;
     @ManyToOne
     private Account account;
 
     public Revenue(String title, String description, long amountInCents, RevenueCategory category,
-                   LocalDateTime createdAt, TransactionStatus status, Account account) {
+                   LocalDateTime createdAt, TransactionStatus status, boolean automaticProcess, Account account) {
         this.title = title;
         this.description = description;
         this.amountInCents = amountInCents;
         this.category = category;
         this.createdAt = createdAt;
         this.status = status;
+        this.automaticProcess = automaticProcess;
         this.account = account;
     }
 
@@ -68,6 +71,10 @@ public class Revenue {
 
     public void setStatus(TransactionStatus status) {
         this.status = status;
+    }
+
+    public void setAutomaticProcess(boolean automaticProcess) {
+        this.automaticProcess = automaticProcess;
     }
 
 }

@@ -9,11 +9,16 @@ import api.controla_preju.entities.enums.RevenueCategory;
 import api.controla_preju.entities.enums.TransactionStatus;
 import api.controla_preju.exceptions.AuthorizationException;
 import api.controla_preju.exceptions.BusinessException;
+import api.controla_preju.repositories.AccountRepository;
 import api.controla_preju.repositories.RevenueRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,10 +28,15 @@ public class RevenueService {
 
     private final RevenueRepository revenueRepository;
     private final AccountService accountService;
+    private final AccountRepository accountRepository;
+    private final TransactionTemplate transactionTemplate;
 
-    public RevenueService(RevenueRepository revenueRepository, AccountService accountService) {
+    public RevenueService(RevenueRepository revenueRepository, AccountService accountService, AccountRepository accountRepository, PlatformTransactionManager transactionManager) {
         this.revenueRepository = revenueRepository;
         this.accountService = accountService;
+        this.accountRepository = accountRepository;
+        this.transactionTemplate = new TransactionTemplate(transactionManager);
+        this.transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
     }
 
     public Revenue findById(UUID revenueId, UUID userId) {
@@ -49,6 +59,19 @@ public class RevenueService {
             throw new BusinessException("Uma receita com exatamente os mesmos dados já foi registrada.");
         }
 
+        if (form.status() == TransactionStatus.COMPLETED && form.createdAt().isAfter(LocalDateTime.now().plusMinutes(2))) {
+            throw new BusinessException("Transações com data futura devem ser registradas como PENDENTES.");
+        }
+
+        if (form.automaticProcess()) {
+            if (form.createdAt().isBefore(LocalDateTime.now())) {
+                throw new BusinessException("Receitas automáticas devem ter data de criação futura.");
+            }
+            if (form.status() == TransactionStatus.COMPLETED) {
+                throw new BusinessException("Receitas automáticas não podem ser criadas já como COMPLETED.");
+            }
+        }
+
         Account account = accountService.findById(form.accountId(), owner.getId());
 
         if (form.status() == TransactionStatus.COMPLETED) {
@@ -62,6 +85,7 @@ public class RevenueService {
                 form.category(),
                 form.createdAt(),
                 form.status(),
+                form.automaticProcess(),
                 account
         );
 
@@ -100,6 +124,27 @@ public class RevenueService {
         if (form.createdAt() != null) revenue.setCreatedAt(form.createdAt());
         if (form.amountInCents() != null) revenue.setAmountInCents(form.amountInCents());
         if (form.status() != null) revenue.setStatus(form.status());
+        if (form.automaticProcess() != null) revenue.setAutomaticProcess(form.automaticProcess());
+
+        if (revenue.getStatus() == TransactionStatus.COMPLETED && revenue.getCreatedAt().isAfter(LocalDateTime.now().plusMinutes(2))) {
+            throw new BusinessException("Transações com data futura devem ser registradas como PENDENTES.");
+        }
+
+        if (oldStatus == TransactionStatus.COMPLETED
+                && form.automaticProcess() != null
+                && form.automaticProcess() != revenue.isAutomaticProcess()) {
+            throw new BusinessException("Não é possível alterar o processo automático de uma receita já concluída.");
+        }
+
+        if (revenue.getStatus() == TransactionStatus.COMPLETED && revenue.isAutomaticProcess()) {
+            revenue.setAutomaticProcess(false);
+        }
+
+        if (revenue.isAutomaticProcess() && revenue.getStatus() == TransactionStatus.PENDING) {
+            if (revenue.getCreatedAt().isBefore(LocalDateTime.now().minusMinutes(2))) {
+                throw new BusinessException("A data de uma receita automática não pode estar no passado.");
+            }
+        }
 
         long effectiveOldImpact = (oldStatus == TransactionStatus.COMPLETED) ? oldAmount : 0;
         long effectiveNewImpact = (revenue.getStatus() == TransactionStatus.COMPLETED) ? revenue.getAmountInCents() : 0;
@@ -136,6 +181,24 @@ public class RevenueService {
         }
 
         throw new BusinessException("Combinação de filtros inválida ou não suportada.");
+    }
+
+    public void processAutomaticRevenues() {
+        LocalDateTime now = LocalDateTime.now();
+        List<Revenue> pendingRevenues = revenueRepository.findAllByStatusAndAutomaticProcessTrueAndCreatedAtBefore(TransactionStatus.PENDING, now);
+
+        for (Revenue revenue : pendingRevenues) {
+            transactionTemplate.executeWithoutResult(status -> {
+                try {
+                    accountRepository.addBalance(revenue.getAccount().getId(), revenue.getAmountInCents());
+                    revenue.setStatus(TransactionStatus.COMPLETED);
+                    revenue.setAutomaticProcess(false);
+                    revenueRepository.save(revenue);
+                } catch (Exception e) {
+                    status.setRollbackOnly();
+                }
+            });
+        }
     }
 
 }

@@ -21,6 +21,8 @@ public record UpdateRevenueForm(
 
         LocalDateTime createdAt,
 
-        TransactionStatus status
+        TransactionStatus status,
+
+        Boolean automaticProcess
 ) {
 }

@@ -36,12 +36,12 @@ public interface AccountJpaRepository extends JpaRepository<Account, UUID>  {
             JOIN Accounts a ON e.account_id = a.id
             WHERE a.user_id = :userId
         UNION ALL
-            SELECT t.id, t.title, t.amount_in_cents, t.created_at, 'TRANSFER_SENT' AS type, t.source_account_id, 'COMPLETED' AS status
+            SELECT t.id, t.title, t.amount_in_cents, t.created_at, 'TRANSFER_SENT' AS type, t.source_account_id, t.status
             FROM Transfers t
             JOIN Accounts a ON t.source_account_id = a.id
             WHERE a.user_id = :userId
         UNION ALL
-            SELECT t.id, t.title, t.amount_in_cents, t.created_at, 'TRANSFER_RECEIVED' AS type, t.destination_account_id, 'COMPLETED' AS status
+            SELECT t.id, t.title, t.amount_in_cents, t.created_at, 'TRANSFER_RECEIVED' AS type, t.destination_account_id, t.status
             FROM Transfers t
             JOIN Accounts a ON t.destination_account_id = a.id
             WHERE a.user_id = :userId
@@ -50,11 +50,11 @@ public interface AccountJpaRepository extends JpaRepository<Account, UUID>  {
     """, countQuery = """
         SELECT COUNT(*) FROM (
             SELECT r.id FROM Revenues r JOIN Accounts a ON r.account_id = a.id WHERE a.user_id = :userId
-            UNION
+            UNION ALL
             SELECT e.id FROM Expenses e JOIN Accounts a ON e.account_id = a.id WHERE a.user_id = :userId
-            UNION
+            UNION ALL
             SELECT t.id FROM Transfers t JOIN Accounts a ON t.source_account_id = a.id WHERE a.user_id = :userId
-            UNION
+            UNION ALL
             SELECT t.id FROM Transfers t JOIN Accounts a ON t.destination_account_id = a.id WHERE a.user_id = :userId
         ) AS total_transactions
     """, nativeQuery = true)
@@ -63,5 +63,9 @@ public interface AccountJpaRepository extends JpaRepository<Account, UUID>  {
     @Modifying
     @Query("UPDATE Account a SET a.balanceInCents = a.balanceInCents - :amount WHERE a.id = :accountId AND a.balanceInCents >= :amount")
     int subtractBalanceIfSufficient(@Param("accountId") UUID accountId, @Param("amount") long amount);
+
+    @Modifying
+    @Query("UPDATE Account a SET a.balanceInCents = a.balanceInCents + :amount WHERE a.id = :accountId")
+    int addBalance(@Param("accountId") UUID accountId, @Param("amount") long amount);
 
 }

@@ -1,5 +1,6 @@
 package api.controla_preju.dtos.forms;
 
+import api.controla_preju.entities.enums.TransactionStatus;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
@@ -15,6 +16,10 @@ public record UpdateTransferForm(
         @Min(value = 1, message = "O valor da transferência deve ser no mínimo 1.")
         Long amountInCents,
 
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+
+        TransactionStatus status,
+
+        Boolean automaticProcess
 ) {
 }

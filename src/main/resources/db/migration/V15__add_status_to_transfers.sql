@@ -1,0 +1,3 @@
+ALTER TABLE transfers ADD COLUMN status VARCHAR(30);
+UPDATE transfers SET status = 'COMPLETED';
+ALTER TABLE transfers ALTER COLUMN status SET NOT NULL;

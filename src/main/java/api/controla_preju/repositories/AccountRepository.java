@@ -57,4 +57,8 @@ public class AccountRepository {
         return jpaRepository.subtractBalanceIfSufficient(accountId, amount);
     }
 
+    public int addBalance(UUID accountId, long amount) {
+        return jpaRepository.addBalance(accountId, amount);
+    }
+
 }
