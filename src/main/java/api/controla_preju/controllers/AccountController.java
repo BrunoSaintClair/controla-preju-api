@@ -2,8 +2,6 @@ package api.controla_preju.controllers;
 
 import api.controla_preju.dtos.forms.CreateAccountForm;
 import api.controla_preju.dtos.forms.UpdateAccountForm;
-import api.controla_preju.dtos.forms.UpdateBalanceForm;
-import api.controla_preju.dtos.forms.UpdateCanChangeBalanceForm;
 import api.controla_preju.dtos.views.*;
 import api.controla_preju.entities.User;
 import api.controla_preju.entities.enums.ExpenseCategory;
@@ -82,27 +80,6 @@ public class AccountController {
                                                      @AuthenticationPrincipal(expression = "id") UUID userId){
         var oldAccount = accountService.findById(accountId, userId);
         var updatedAccount = accountService.update(oldAccount, form);
-        var response = new AccountDetailsView(updatedAccount);
-        return ResponseEntity.ok(response);
-    }
-
-    @PatchMapping("/{accountId}/balance")
-    public ResponseEntity<AccountDetailsView> updateBalance(@PathVariable UUID accountId,
-                                                            @Valid @RequestBody UpdateBalanceForm form,
-                                                            @AuthenticationPrincipal(expression = "id") UUID userId) {
-        var account = accountService.findById(accountId, userId);
-        var updatedAccount = accountService.updateBalance(account, form);
-        var response = new AccountDetailsView(updatedAccount);
-        return ResponseEntity.ok(response);
-    }
-
-
-    @PatchMapping("/{accountId}/can-change-balance")
-    public ResponseEntity<AccountDetailsView> updateCanChangeBalance(@PathVariable UUID accountId,
-                                                                     @Valid @RequestBody UpdateCanChangeBalanceForm form,
-                                                                     @AuthenticationPrincipal(expression = "id") UUID userId){
-        var account = accountService.findById(accountId, userId);
-        var updatedAccount = accountService.updateCanChangeBalance(account, form);
         var response = new AccountDetailsView(updatedAccount);
         return ResponseEntity.ok(response);
     }

@@ -52,10 +52,10 @@ class TransferServiceTest {
         user = new User("test@email.com", "User Test", "password");
         ReflectionTestUtils.setField(user, "id", userId);
 
-        sourceAccount = new Account("Origem", "Conta de saída", AccountType.CHECKING_ACCOUNT, 2000L, true, user);
+        sourceAccount = new Account("Origem", "Conta de saída", AccountType.CHECKING_ACCOUNT, 2000L, user);
         ReflectionTestUtils.setField(sourceAccount, "id", UUID.randomUUID());
 
-        destinationAccount = new Account("Destino", "Conta de entrada", AccountType.SAVINGS_ACCOUNT, 500L, true, user);
+        destinationAccount = new Account("Destino", "Conta de entrada", AccountType.SAVINGS_ACCOUNT, 500L, user);
         ReflectionTestUtils.setField(destinationAccount, "id", UUID.randomUUID());
 
         createForm = new CreateTransferForm(

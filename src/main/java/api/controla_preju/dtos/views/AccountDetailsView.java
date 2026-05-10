@@ -8,11 +8,10 @@ import java.util.UUID;
 
 public record AccountDetailsView(UUID id, String name, String description,
                                  AccountType type, long balanceInCents,
-                                 Boolean canChangeBalance, LocalDateTime updatedAt,
-                                 LocalDateTime createdAt)
+                                 LocalDateTime updatedAt, LocalDateTime createdAt)
 {
     public AccountDetailsView(Account account) {
         this(account.getId(), account.getName(), account.getDescription(), account.getType(),
-                account.getBalanceInCents(), account.isCanChangeBalance(), account.getUpdatedAt(), account.getCreatedAt());
+                account.getBalanceInCents(), account.getUpdatedAt(), account.getCreatedAt());
     }
 }

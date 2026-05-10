@@ -20,9 +20,7 @@ public record CreateAccountForm(
 
         @NotNull(message = "O campo de saldo inicial da conta não pode ser vazio.")
         @Min(value = 0, message = "O saldo inicial não pode ser menor que 0.")
-        Long initialBalance,
+        Long initialBalance
 
-        @NotNull(message = "O campo de pode definir saldo da conta não pode ser vazio.")
-        Boolean canChangeBalance
 ) {
 }

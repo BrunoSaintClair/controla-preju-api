@@ -53,7 +53,7 @@ class ExpenseServiceTest {
         user = new User("test@email.com", "User Test", "password");
         ReflectionTestUtils.setField(user, "id", userId);
 
-        account = new Account("Corrente", "Conta principal", AccountType.CHECKING_ACCOUNT, 2000L, true, user);
+        account = new Account("Corrente", "Conta principal", AccountType.CHECKING_ACCOUNT, 2000L, user);
         ReflectionTestUtils.setField(account, "id", UUID.randomUUID());
 
         createForm = new CreateExpenseForm(

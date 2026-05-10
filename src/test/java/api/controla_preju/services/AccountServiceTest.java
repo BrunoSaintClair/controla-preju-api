@@ -1,7 +1,6 @@
 package api.controla_preju.services;
 
 import api.controla_preju.dtos.forms.CreateAccountForm;
-import api.controla_preju.dtos.forms.UpdateBalanceForm;
 import api.controla_preju.entities.Account;
 import api.controla_preju.entities.User;
 import api.controla_preju.entities.enums.AccountType;
@@ -47,14 +46,13 @@ class AccountServiceTest {
         ReflectionTestUtils.setField(user, "id", userId);
 
         form = new CreateAccountForm("Acc", "Desc", AccountType.INVESTMENTS,
-                1000L, true);
+                1000L);
 
         account = new Account(
                 "Acc",
                 "Desc",
                 AccountType.INVESTMENTS,
                 1000L,
-                true,
                 user
         );
         ReflectionTestUtils.setField(account, "id", UUID.randomUUID());
@@ -122,18 +120,6 @@ class AccountServiceTest {
     void shouldDeleteAccount() {
         accountService.delete(account);
         verify(accountRepository).delete(account);
-    }
-
-    @Test
-    @DisplayName("Should update balance successfully when account allows it")
-    void shouldUpdateBalance() {
-        UpdateBalanceForm balanceForm = new UpdateBalanceForm(5000L);
-        when(accountRepository.save(account)).thenReturn(account);
-
-        Account updatedAccount = accountService.updateBalance(account, balanceForm);
-
-        assertEquals(5000L, updatedAccount.getBalanceInCents());
-        verify(accountRepository).save(account);
     }
 
 }

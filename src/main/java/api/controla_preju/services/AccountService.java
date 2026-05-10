@@ -2,8 +2,6 @@ package api.controla_preju.services;
 
 import api.controla_preju.dtos.forms.CreateAccountForm;
 import api.controla_preju.dtos.forms.UpdateAccountForm;
-import api.controla_preju.dtos.forms.UpdateBalanceForm;
-import api.controla_preju.dtos.forms.UpdateCanChangeBalanceForm;
 import api.controla_preju.dtos.views.TransactionHistoryView;
 import api.controla_preju.entities.Account;
 import api.controla_preju.entities.User;
@@ -49,7 +47,6 @@ public class AccountService {
                 form.description(),
                 form.type(),
                 form.initialBalance(),
-                form.canChangeBalance(),
                 owner
         );
         return accountRepository.save(newAccount);
@@ -96,22 +93,6 @@ public class AccountService {
         }
         if (form.type() != null) account.setType(form.type());
 
-        return accountRepository.save(account);
-    }
-
-    @Transactional
-    public Account updateBalance(Account account, UpdateBalanceForm form) {
-        if (!account.isCanChangeBalance()) {
-            throw new BusinessException("Esta conta não permite a alteração manual do saldo.");
-        }
-
-        account.setBalanceInCents(form.newBalanceInCents());
-        return accountRepository.save(account);
-    }
-
-    @Transactional
-    public Account updateCanChangeBalance(Account account, UpdateCanChangeBalanceForm form) {
-        account.setCanChangeBalance(form.canChangeBalance());
         return accountRepository.save(account);
     }
 

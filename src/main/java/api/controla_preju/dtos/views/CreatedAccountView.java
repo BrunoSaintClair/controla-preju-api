@@ -6,10 +6,10 @@ import api.controla_preju.entities.enums.AccountType;
 import java.util.UUID;
 
 public record CreatedAccountView(UUID id, String name, String description,
-                                 AccountType type, Long balanceInCents, boolean canChangeBalance)
+                                 AccountType type, Long balanceInCents)
 {
     public CreatedAccountView(Account account){
         this(account.getId(), account.getName(), account.getDescription(), account.getType(),
-                account.getBalanceInCents(), account.isCanChangeBalance());
+                account.getBalanceInCents());
     }
 }
