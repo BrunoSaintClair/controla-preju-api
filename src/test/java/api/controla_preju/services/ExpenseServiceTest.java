@@ -11,6 +11,7 @@ import api.controla_preju.entities.enums.PaymentMethod;
 import api.controla_preju.entities.enums.TransactionStatus;
 import api.controla_preju.exceptions.AuthorizationException;
 import api.controla_preju.exceptions.BusinessException;
+import api.controla_preju.repositories.AccountRepository;
 import api.controla_preju.repositories.ExpenseRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,8 +22,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.SimpleTransactionStatus;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -37,6 +41,12 @@ class ExpenseServiceTest {
     private ExpenseRepository expenseRepository;
     @Mock
     private AccountService accountService;
+    @Mock
+    private AccountRepository accountRepository;
+    @Mock
+    private EmailService emailService;
+    @Mock
+    private PlatformTransactionManager transactionManager;
 
     @InjectMocks
     private ExpenseService expenseService;
@@ -64,6 +74,7 @@ class ExpenseServiceTest {
                 PaymentMethod.DEBIT_CARD,
                 LocalDateTime.now(),
                 TransactionStatus.COMPLETED,
+                Boolean.FALSE,
                 account.getId()
         );
 
@@ -75,6 +86,7 @@ class ExpenseServiceTest {
                 createForm.category(),
                 createForm.createdAt(),
                 createForm.status(),
+                createForm.automaticDebit(),
                 account
         );
         ReflectionTestUtils.setField(expense, "id", UUID.randomUUID());
@@ -163,7 +175,11 @@ class ExpenseServiceTest {
     void shouldUpdateExpenseAmountSuccessfully() {
         account.setBalanceInCents(1500L);
 
-        UpdateExpenseForm updateForm = new UpdateExpenseForm(null, null, 800L, null, null, null, null);
+        UpdateExpenseForm updateForm = new UpdateExpenseForm(
+                null, null, 800L, null,
+                null, null, null, null
+        );
+
         when(expenseRepository.save(any(Expense.class))).thenReturn(expense);
 
         expenseService.update(expense, updateForm);
@@ -176,10 +192,58 @@ class ExpenseServiceTest {
     @Test
     @DisplayName("Should throw exception when update results in negative balance")
     void shouldThrowExceptionWhenUpdateExceedsBalance() {
-        UpdateExpenseForm updateForm = new UpdateExpenseForm(null, null, 3000L, null, null, null, null);
+        UpdateExpenseForm updateForm = new UpdateExpenseForm(
+                null, null, 3000L, null,
+                null, null, null, null
+        );
 
         assertThrows(BusinessException.class, () -> expenseService.update(expense, updateForm));
         verify(expenseRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Should complete pending automatic debit when balance is sufficient")
+    void shouldProcessAutomaticDebitSuccessfully() {
+        expense.setStatus(TransactionStatus.PENDING);
+        expense.setAutomaticDebit(true);
+        expense.setCreatedAt(LocalDateTime.now().minusDays(1));
+
+        when(expenseRepository.findAllByStatusAndAutomaticDebitTrueAndCreatedAtBefore(any(), any()))
+                .thenReturn(List.of(expense));
+
+        when(transactionManager.getTransaction(any())).thenReturn(new SimpleTransactionStatus());
+
+        when(accountRepository.subtractBalanceIfSufficient(account.getId(), expense.getAmountInCents())).thenReturn(1);
+
+        expenseService.processAutomaticDebits();
+
+        assertEquals(TransactionStatus.COMPLETED, expense.getStatus());
+        assertFalse(expense.isAutomaticDebit());
+        verify(accountRepository).subtractBalanceIfSufficient(account.getId(), expense.getAmountInCents());
+        verify(expenseRepository).save(expense);
+    }
+
+    @Test
+    @DisplayName("Should fail automatic debit, update status to FAILED, and send email when balance is insufficient")
+    void shouldFailAutomaticDebitWhenInsufficientBalance() {
+        expense.setStatus(TransactionStatus.PENDING);
+        expense.setAutomaticDebit(true);
+
+        when(expenseRepository.findAllByStatusAndAutomaticDebitTrueAndCreatedAtBefore(eq(TransactionStatus.PENDING), any(LocalDateTime.class)))
+                .thenReturn(List.of(expense));
+
+        when(transactionManager.getTransaction(any())).thenReturn(new SimpleTransactionStatus());
+
+        when(accountRepository.subtractBalanceIfSufficient(account.getId(), expense.getAmountInCents())).thenReturn(0);
+
+        expenseService.processAutomaticDebits();
+
+        assertEquals(TransactionStatus.FAILED, expense.getStatus());
+        assertFalse(expense.isAutomaticDebit());
+
+        verify(expenseRepository).save(expense);
+
+        verify(emailService).sendFailedAutomaticDebitsEmail(user, List.of(expense));
     }
 
 }

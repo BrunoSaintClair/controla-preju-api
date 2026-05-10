@@ -53,4 +53,8 @@ public class AccountRepository {
         return jpaRepository.getTransactionHistoryByUserId(userId, pageable);
     }
 
+    public int subtractBalanceIfSufficient(UUID accountId, long amount) {
+        return jpaRepository.subtractBalanceIfSufficient(accountId, amount);
+    }
+
 }

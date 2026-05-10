@@ -35,6 +35,9 @@ public record CreateExpenseForm(
         @NotNull(message = "O status da transação não pode ser nulo.")
         TransactionStatus status,
 
+        @NotNull
+        Boolean automaticDebit,
+
         @NotNull(message = "O ID da conta não pode ser nulo.")
         UUID accountId
 ) {

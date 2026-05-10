@@ -3,6 +3,7 @@ package api.controla_preju.repositories.jpa;
 import api.controla_preju.entities.Expense;
 import api.controla_preju.entities.enums.ExpenseCategory;
 import api.controla_preju.entities.enums.PaymentMethod;
+import api.controla_preju.entities.enums.TransactionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -47,6 +48,10 @@ public interface ExpenseJpaRepository extends JpaRepository<Expense, UUID> {
 
     boolean existsByTitleAndCreatedAtAndAmountInCentsAndCategory(
             String title, LocalDateTime createdAt, long amountInCents, ExpenseCategory category
+    );
+
+    List<Expense> findAllByStatusAndAutomaticDebitTrueAndCreatedAtBefore(
+            TransactionStatus status, LocalDateTime dateTime
     );
 
 }

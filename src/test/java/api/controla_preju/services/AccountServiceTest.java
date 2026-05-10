@@ -7,6 +7,7 @@ import api.controla_preju.entities.enums.AccountType;
 import api.controla_preju.exceptions.AuthorizationException;
 import api.controla_preju.exceptions.BusinessException;
 import api.controla_preju.repositories.AccountRepository;
+import api.controla_preju.repositories.ExpenseRepository;
 import api.controla_preju.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,6 +32,8 @@ class AccountServiceTest {
     private AccountRepository accountRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private ExpenseRepository expenseRepository;
 
     @InjectMocks
     private AccountService accountService;

@@ -1,6 +1,7 @@
 package api.controla_preju.services;
 
 import api.controla_preju.entities.Email;
+import api.controla_preju.entities.Expense;
 import api.controla_preju.entities.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -8,6 +9,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -81,6 +83,35 @@ public class EmailService {
         var message = new SimpleMailMessage();
         message.setTo(user.getEmail());
         message.setSubject("Recuperação de senha - ControlaPreju");
+        message.setText(emailBody);
+        mailSender.send(message);
+    }
+
+    @Async
+    public void sendFailedAutomaticDebitsEmail(User user, List<Expense> failedExpenses) {
+        StringBuilder expensesList = new StringBuilder();
+        for (Expense expense : failedExpenses) {
+            double amountInReais = expense.getAmountInCents() / 100.0;
+            expensesList.append(String.format("- %s: R$ %.2f\n", expense.getTitle(), amountInReais));
+        }
+
+        String emailBody = String.format("""
+        Olá, %s!
+
+        Aviso importante: Não foi possível realizar o débito automático das seguintes despesas devido a saldo insuficiente na conta vinculada no momento da cobrança:
+        
+        %s
+        Para evitar atrasos, por favor, acesse o sistema, regularize seu saldo e realize o pagamento manualmente.
+        
+        O débito automático destas despesas foi desativado.
+        
+        Atenciosamente, equipe ControlaPreju.
+        """, user.getName(), expensesList.toString());
+
+        var message = new SimpleMailMessage();
+        message.setFrom(from);
+        message.setTo(user.getEmail());
+        message.setSubject("Falha no Débito Automático - ControlaPreju");
         message.setText(emailBody);
         mailSender.send(message);
     }

@@ -4,10 +4,13 @@ import api.controla_preju.dtos.forms.CreateAccountForm;
 import api.controla_preju.dtos.forms.UpdateAccountForm;
 import api.controla_preju.dtos.views.TransactionHistoryView;
 import api.controla_preju.entities.Account;
+import api.controla_preju.entities.Expense;
 import api.controla_preju.entities.User;
+import api.controla_preju.entities.enums.TransactionStatus;
 import api.controla_preju.exceptions.AuthorizationException;
 import api.controla_preju.exceptions.BusinessException;
 import api.controla_preju.repositories.AccountRepository;
+import api.controla_preju.repositories.ExpenseRepository;
 import api.controla_preju.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,12 +28,15 @@ public class AccountService {
 
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
+    private final ExpenseRepository expenseRepository;
     @Value("${api.max-accounts-per-user}")
     private int maxAccountsPerUser;
 
-    public AccountService(AccountRepository accountRepository, UserRepository userRepository) {
+    public AccountService(AccountRepository accountRepository, UserRepository userRepository,
+                          ExpenseRepository expenseRepository) {
         this.accountRepository = accountRepository;
         this.userRepository = userRepository;
+        this.expenseRepository = expenseRepository;
     }
 
     @Transactional
@@ -74,6 +80,14 @@ public class AccountService {
 
     @Transactional
     public void delete(Account account) {
+        List<Expense> expenses = expenseRepository.findAllByAccountId(account.getId());
+        boolean hasPendingAutomations = expenses.stream()
+                .anyMatch(e -> e.isAutomaticDebit() && e.getStatus() == TransactionStatus.PENDING);
+
+        if (hasPendingAutomations) {
+            throw new BusinessException("Não é possível excluir esta conta, pois existem débitos automáticos pendentes vinculados a ela.");
+        }
+
         accountRepository.delete(account);
     }
 

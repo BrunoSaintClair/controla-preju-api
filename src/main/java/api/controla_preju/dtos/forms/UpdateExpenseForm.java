@@ -24,6 +24,8 @@ public record UpdateExpenseForm(
 
         LocalDateTime createdAt,
 
-        TransactionStatus status
+        TransactionStatus status,
+
+        Boolean automaticDebit
 ) {
 }

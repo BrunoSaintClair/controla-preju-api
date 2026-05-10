@@ -3,6 +3,7 @@ package api.controla_preju.repositories;
 import api.controla_preju.entities.Expense;
 import api.controla_preju.entities.enums.ExpenseCategory;
 import api.controla_preju.entities.enums.PaymentMethod;
+import api.controla_preju.entities.enums.TransactionStatus;
 import api.controla_preju.repositories.jpa.ExpenseJpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -68,6 +69,11 @@ public class ExpenseRepository {
         return expenseJpaRepository.existsByTitleAndCreatedAtAndAmountInCentsAndCategory(
                 title, createdAt, amountInCents, category
         );
+    }
+
+    public List<Expense> findAllByStatusAndAutomaticDebitTrueAndCreatedAtBefore(TransactionStatus status,
+                                                                                LocalDateTime dateTime) {
+        return expenseJpaRepository.findAllByStatusAndAutomaticDebitTrueAndCreatedAtBefore(status, dateTime);
     }
 
 }

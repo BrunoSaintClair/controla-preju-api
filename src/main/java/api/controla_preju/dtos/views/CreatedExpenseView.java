@@ -10,11 +10,12 @@ import java.util.UUID;
 
 public record CreatedExpenseView(UUID id, String title, String description, long amountInCents,
                                  ExpenseCategory category, PaymentMethod paymentMethod,
-                                 LocalDateTime createdAt, TransactionStatus status, UUID accountId)
+                                 LocalDateTime createdAt, TransactionStatus status,
+                                 boolean automaticDebit, UUID accountId)
 {
     public CreatedExpenseView(Expense expense){
         this(expense.getId(), expense.getTitle(), expense.getDescription(), expense.getAmountInCents(),
                 expense.getCategory(), expense.getPaymentMethod(), expense.getCreatedAt(),
-                expense.getStatus(), expense.getAccount().getId());
+                expense.getStatus(), expense.isAutomaticDebit(), expense.getAccount().getId());
     }
 }

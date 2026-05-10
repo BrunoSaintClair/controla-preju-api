@@ -36,11 +36,14 @@ public class Expense {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private TransactionStatus status;
+    @Column(nullable = false)
+    private boolean automaticDebit;
     @ManyToOne
     private Account account;
 
     public Expense(String title, String description, long amountInCents, PaymentMethod paymentMethod,
-                   ExpenseCategory category, LocalDateTime createdAt, TransactionStatus status, Account account) {
+                   ExpenseCategory category, LocalDateTime createdAt, TransactionStatus status,
+                   boolean automaticDebit, Account account) {
         this.title = title;
         this.description = description;
         this.amountInCents = amountInCents;
@@ -48,6 +51,7 @@ public class Expense {
         this.category = category;
         this.createdAt = createdAt;
         this.status = status;
+        this.automaticDebit = automaticDebit;
         this.account = account;
     }
 
@@ -78,5 +82,9 @@ public class Expense {
     public void setStatus(TransactionStatus status) {
         this.status = status;
     }
+
+    public boolean isAutomaticDebit() { return automaticDebit; }
+
+    public void setAutomaticDebit(boolean automaticDebit) { this.automaticDebit = automaticDebit; }
 
 }

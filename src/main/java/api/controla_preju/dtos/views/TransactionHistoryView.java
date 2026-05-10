@@ -9,6 +9,7 @@ public record TransactionHistoryView(
         Long amountInCents,
         Timestamp createdAt,
         String type,
-        UUID accountId
+        UUID accountId,
+        String status
 ) {
 }
