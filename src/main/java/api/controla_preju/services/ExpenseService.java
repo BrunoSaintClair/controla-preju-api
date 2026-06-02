@@ -2,9 +2,7 @@ package api.controla_preju.services;
 
 import api.controla_preju.dtos.forms.CreateExpenseForm;
 import api.controla_preju.dtos.forms.UpdateExpenseForm;
-import api.controla_preju.entities.Account;
-import api.controla_preju.entities.Expense;
-import api.controla_preju.entities.User;
+import api.controla_preju.entities.*;
 import api.controla_preju.entities.enums.AccountType;
 import api.controla_preju.entities.enums.ExpenseCategory;
 import api.controla_preju.entities.enums.PaymentMethod;
@@ -29,39 +27,81 @@ public class ExpenseService {
     private final ExpenseRepository expenseRepository;
     private final AccountService accountService;
     private final AccountRepository accountRepository;
+    private final CreditCardService creditCardService;
+    private final InvoiceService invoiceService;
     private final EmailService emailService;
     private final TransactionTemplate transactionTemplate;
 
-    public ExpenseService(ExpenseRepository expenseRepository,
-                          AccountService accountService,
-                          AccountRepository accountRepository,
-                          EmailService emailService,
+    public ExpenseService(ExpenseRepository expenseRepository, AccountService accountService,
+                          AccountRepository accountRepository, CreditCardService creditCardService,
+                          InvoiceService invoiceService, EmailService emailService,
                           PlatformTransactionManager transactionManager) {
         this.expenseRepository = expenseRepository;
         this.accountService = accountService;
         this.accountRepository = accountRepository;
+        this.creditCardService = creditCardService;
+        this.invoiceService = invoiceService;
         this.emailService = emailService;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
         this.transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
     }
 
     public Expense findById(UUID expenseId, UUID userId) {
-        Optional<Expense> optionalExpense = expenseRepository.findById(expenseId);
-        if (optionalExpense.isEmpty()) throw new EntityNotFoundException("Despesa não encontrada.");
+        Expense expense = expenseRepository.findById(expenseId).orElseThrow(() -> new EntityNotFoundException("Despesa não encontrada."));
+        boolean ownsAccount = expense.getAccount() != null && expense.getAccount().getUser().getId().equals(userId);
+        boolean ownsCreditCard = expense.getInvoice() != null && expense.getInvoice().getCreditCard().getUser().getId().equals(userId);
 
-        Expense expense = optionalExpense.get();
-        if (!expense.getAccount().getUser().getId().equals(userId)) {
-            throw new AuthorizationException("Esta despesa não pertence ao usuário que está efetuando a requisição.");
+        if (!ownsAccount && !ownsCreditCard) {
+            throw new AuthorizationException("Esta despesa não pertence a você.");
         }
         return expense;
     }
 
     @Transactional
-    public Expense create(CreateExpenseForm form, User owner) {
+    public List<Expense> create(CreateExpenseForm form, User owner) {
+        if (form.paymentMethod() == PaymentMethod.CREDIT_CARD) {
+            return processCreditCardExpense(form, owner);
+        } else {
+            return List.of(processStandardExpense(form, owner));
+        }
+    }
+
+    private List<Expense> processCreditCardExpense(CreateExpenseForm form, User owner) {
+        if (form.creditCardId() == null) throw new BusinessException("ID do cartão de crédito é obrigatório.");
+
+        CreditCard card = creditCardService.findById(form.creditCardId(), owner.getId());
+        if (card.getAvailableLimitInCents() < form.amountInCents()) throw new BusinessException("Limite disponível insuficiente.");
+
+        int installments = (form.installments() != null && form.installments() > 0) ? form.installments() : 1;
+        long amountPerInstallment = form.amountInCents() / installments;
+        long remainder = form.amountInCents() % installments;
+
+        card.subtractLimit(form.amountInCents());
+        creditCardService.save(card);
+
+        List<Expense> expenses = new ArrayList<>();
+        for (int i = 0; i < installments; i++) {
+            long currentInstallmentAmount = amountPerInstallment + (i == 0 ? remainder : 0);
+            Invoice invoice = invoiceService.getOrCreateInvoiceForFutureMonth(card, form.createdAt(), i);
+            invoice.addAmount(currentInstallmentAmount);
+            invoiceService.save(invoice);
+
+            String title = installments > 1 ? form.title() + " (" + (i + 1) + "/" + installments + ")" : form.title();
+            Expense expense = new Expense(
+                    title, form.description(), currentInstallmentAmount, form.paymentMethod(),
+                    form.category(), form.createdAt(), TransactionStatus.COMPLETED, false,
+                    invoice, null
+            );
+            expenses.add(expenseRepository.save(expense));
+        }
+        return expenses;
+    }
+
+    private Expense processStandardExpense(CreateExpenseForm form, User owner) {
+        if (form.accountId() == null) throw new BusinessException("ID da conta é obrigatório.");
         if (expenseRepository.existsDuplicate(form.title(), form.createdAt(), form.amountInCents(), form.category())) {
             throw new BusinessException("Uma despesa com exatamente os mesmos dados já foi registrada.");
         }
-
         if (form.status() == TransactionStatus.COMPLETED && form.createdAt().isAfter(LocalDateTime.now().plusMinutes(2))) {
             throw new BusinessException("Transações com data futura devem ser registradas como PENDENTES.");
         }
@@ -69,42 +109,30 @@ public class ExpenseService {
         Account account = accountService.findById(form.accountId(), owner.getId());
 
         if (form.status() == TransactionStatus.COMPLETED) {
-            if (account.getBalanceInCents() < form.amountInCents()) {
-                throw new BusinessException("Saldo insuficiente para registrar a despesa.");
-            }
-            if (form.automaticDebit()) {
-                throw new BusinessException("Despesas com débito automático não podem ser criadas já como COMPLETED.");
-            }
+            if (account.getBalanceInCents() < form.amountInCents()) throw new BusinessException("Saldo insuficiente.");
+            if (form.automaticDebit()) throw new BusinessException("Despesas automáticas não podem ser COMPLETED.");
             account.setBalanceInCents(account.getBalanceInCents() - form.amountInCents());
         }
 
         if (form.automaticDebit()) {
-            if (form.createdAt().isBefore(LocalDateTime.now())) {
-                throw new BusinessException("Despesas com débito automático devem ter data de criação futura.");
-            }
-            if (account.getType() == AccountType.WALLET) {
-                throw new BusinessException("Contas do tipo Carteira não suportam débito automático.");
-            }
+            if (form.createdAt().isBefore(LocalDateTime.now())) throw new BusinessException("Data de criação deve ser futura.");
+            if (account.getType() == AccountType.WALLET) throw new BusinessException("Carteira não suporta débito automático.");
         }
 
         Expense expense = new Expense(
-                form.title(),
-                form.description(),
-                form.amountInCents(),
-                form.paymentMethod(),
-                form.category(),
-                form.createdAt(),
-                form.status(),
-                form.automaticDebit(),
-                account
-        );
-
+                form.title(), form.description(), form.amountInCents(),
+                form.paymentMethod(), form.category(), form.createdAt(),
+                form.status(), form.automaticDebit(), null, account);
         return expenseRepository.save(expense);
     }
 
     @Transactional
     public void delete(Expense expense) {
-        if (expense.getStatus() == TransactionStatus.COMPLETED) {
+        if (expense.getPaymentMethod() == PaymentMethod.CREDIT_CARD) {
+            Invoice invoice = expense.getInvoice();
+            invoice.subtractAmount(expense.getAmountInCents());
+            invoice.getCreditCard().restoreLimit(expense.getAmountInCents());
+        } else if (expense.getStatus() == TransactionStatus.COMPLETED) {
             Account account = expense.getAccount();
             account.setBalanceInCents(account.getBalanceInCents() + expense.getAmountInCents());
         }
@@ -113,23 +141,22 @@ public class ExpenseService {
 
     @Transactional
     public Expense update(Expense expense, UpdateExpenseForm form) {
-        Account account = expense.getAccount();
+        if (expense.getPaymentMethod() == PaymentMethod.CREDIT_CARD) {
+            if (form.amountInCents() != null || form.paymentMethod() != null) {
+                throw new BusinessException("Não é possível alterar valor ou método de uma despesa de crédito. Exclua e recrie.");
+            }
+            if (form.title() != null) expense.setTitle(form.title());
+            if (form.description() != null) expense.setDescription(form.description());
+            if (form.category() != null) expense.setCategory(form.category());
+            return expenseRepository.save(expense);
+        }
 
+        Account account = expense.getAccount();
         TransactionStatus oldStatus = expense.getStatus();
         long oldAmount = expense.getAmountInCents();
 
-        if (form.title() != null) {
-            if (form.title().isBlank()) {
-                throw new BusinessException("O título da despesa não pode ser vazio.");
-            }
-            expense.setTitle(form.title());
-        }
-        if (form.description() != null) {
-            if (form.description().isBlank()) {
-                throw new BusinessException("A descrição da despesa não pode ser vazia.");
-            }
-            expense.setDescription(form.description());
-        }
+        if (form.title() != null) expense.setTitle(form.title());
+        if (form.description() != null) expense.setDescription(form.description());
         if (form.amountInCents() != null) expense.setAmountInCents(form.amountInCents());
         if (form.paymentMethod() != null) expense.setPaymentMethod(form.paymentMethod());
         if (form.category() != null) expense.setCategory(form.category());
@@ -137,53 +164,22 @@ public class ExpenseService {
         if (form.status() != null) expense.setStatus(form.status());
         if (form.automaticDebit() != null) expense.setAutomaticDebit(form.automaticDebit());
 
-        if (expense.getStatus() == TransactionStatus.COMPLETED && expense.getCreatedAt().isAfter(LocalDateTime.now().plusMinutes(2))) {
-            throw new BusinessException("Transações com data futura devem ser registradas como PENDENTES.");
-        }
-
-        if (oldStatus == TransactionStatus.COMPLETED
-                && form.automaticDebit() != null
-                && form.automaticDebit() != expense.isAutomaticDebit()) {
-            throw new BusinessException("Não é possível alterar o débito automático de uma despesa já concluída.");
-        }
-
-        if (expense.getStatus() == TransactionStatus.COMPLETED && expense.isAutomaticDebit()) {
-            expense.setAutomaticDebit(false);
-        }
-
-        if (expense.isAutomaticDebit() && expense.getStatus() == TransactionStatus.PENDING) {
-            if (account.getType() == AccountType.WALLET) {
-                throw new BusinessException("Contas do tipo Carteira não suportam débito automático.");
-            }
-            if (expense.getCreatedAt().isBefore(LocalDateTime.now().minusMinutes(2))) {
-                throw new BusinessException("A data de uma despesa com débito automático não pode estar no passado.");
-            }
-        }
-
         long effectiveOldImpact = (oldStatus == TransactionStatus.COMPLETED) ? oldAmount : 0;
         long effectiveNewImpact = (expense.getStatus() == TransactionStatus.COMPLETED) ? expense.getAmountInCents() : 0;
-
         long differenceToSubtract = effectiveNewImpact - effectiveOldImpact;
 
         if (differenceToSubtract != 0) {
             long newBalance = account.getBalanceInCents() - differenceToSubtract;
-            if (newBalance < 0) {
-                throw new BusinessException("Saldo insuficiente para efetivar a despesa.");
-            }
+            if (newBalance < 0) throw new BusinessException("Saldo insuficiente.");
             account.setBalanceInCents(newBalance);
         }
 
         return expenseRepository.save(expense);
     }
 
-    public List<Expense> findAllByUserId(UUID userId, Optional<PaymentMethod> paymentMethod,
-                                         Optional<ExpenseCategory> category) {
-        if (paymentMethod.isPresent()) {
-            return expenseRepository.findAllByUserIdAndPaymentMethod(userId, paymentMethod.get());
-        }
-        if (category.isPresent()) {
-            return expenseRepository.findAllByUserIdAndCategory(userId, category.get());
-        }
+    public List<Expense> findAllByUserId(UUID userId, Optional<PaymentMethod> paymentMethod, Optional<ExpenseCategory> category) {
+        if (paymentMethod.isPresent()) return expenseRepository.findAllByUserIdAndPaymentMethod(userId, paymentMethod.get());
+        if (category.isPresent()) return expenseRepository.findAllByUserIdAndCategory(userId, category.get());
         return expenseRepository.findAllByUserId(userId);
     }
 
@@ -208,35 +204,29 @@ public class ExpenseService {
         if (year.isEmpty() && month.isEmpty() && day.isEmpty()) {
             return expenseRepository.findAllByAccountId(accountId);
         }
+
         throw new BusinessException("Combinação de filtros inválida ou não suportada.");
     }
 
     public void processAutomaticDebits() {
         LocalDateTime now = LocalDateTime.now();
-        List<Expense> pendingExpenses = expenseRepository
-                .findAllByStatusAndAutomaticDebitTrueAndCreatedAtBefore(TransactionStatus.PENDING, now);
-
+        List<Expense> pendingExpenses = expenseRepository.findAllByStatusAndAutomaticDebitTrueAndCreatedAtBefore(TransactionStatus.PENDING, now);
         Map<User, List<Expense>> failedExpensesByUser = new HashMap<>();
 
         for (Expense expense : pendingExpenses) {
             transactionTemplate.executeWithoutResult(status -> {
                 try {
                     Account account = expense.getAccount();
-
-                    int updatedRows = accountRepository.subtractBalanceIfSufficient(
-                            account.getId(), expense.getAmountInCents());
-
+                    int updatedRows = accountRepository.subtractBalanceIfSufficient(account.getId(), expense.getAmountInCents());
                     if (updatedRows > 0) {
                         expense.setStatus(TransactionStatus.COMPLETED);
                         expense.setAutomaticDebit(false);
-                        expenseRepository.save(expense);
                     } else {
                         expense.setStatus(TransactionStatus.FAILED);
                         expense.setAutomaticDebit(false);
-                        expenseRepository.save(expense);
-
                         failedExpensesByUser.computeIfAbsent(account.getUser(), k -> new ArrayList<>()).add(expense);
                     }
+                    expenseRepository.save(expense);
                 } catch (Exception e) {
                     status.setRollbackOnly();
                 }

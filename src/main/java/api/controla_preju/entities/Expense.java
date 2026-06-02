@@ -39,11 +39,14 @@ public class Expense {
     @Column(nullable = false)
     private boolean automaticDebit;
     @ManyToOne
+    @JoinColumn(name = "invoice_id", nullable = true)
+    private Invoice invoice;
+    @ManyToOne
     private Account account;
 
     public Expense(String title, String description, long amountInCents, PaymentMethod paymentMethod,
                    ExpenseCategory category, LocalDateTime createdAt, TransactionStatus status,
-                   boolean automaticDebit, Account account) {
+                   boolean automaticDebit, Invoice invoice, Account account) {
         this.title = title;
         this.description = description;
         this.amountInCents = amountInCents;
@@ -52,6 +55,7 @@ public class Expense {
         this.createdAt = createdAt;
         this.status = status;
         this.automaticDebit = automaticDebit;
+        this.invoice = invoice;
         this.account = account;
     }
 

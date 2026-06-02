@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -29,12 +28,11 @@ public class ExpenseController {
     }
 
     @PostMapping
-    public ResponseEntity<CreatedExpenseView> create(@Valid @RequestBody CreateExpenseForm form,
-                                                     @AuthenticationPrincipal User user) {
-        var newExpense = expenseService.create(form, user);
-        var response = new CreatedExpenseView(newExpense);
-        URI location = URI.create("/expenses/" + newExpense.getId());
-        return ResponseEntity.created(location).body(response);
+    public ResponseEntity<List<CreatedExpenseView>> create(@Valid @RequestBody CreateExpenseForm form,
+                                                           @AuthenticationPrincipal User user) {
+        var newExpenses = expenseService.create(form, user);
+        var response = newExpenses.stream().map(CreatedExpenseView::new).toList();
+        return ResponseEntity.status(201).body(response);
     }
 
     @GetMapping

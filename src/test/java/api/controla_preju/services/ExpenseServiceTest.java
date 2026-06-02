@@ -75,7 +75,9 @@ class ExpenseServiceTest {
                 LocalDateTime.now(),
                 TransactionStatus.COMPLETED,
                 Boolean.FALSE,
-                account.getId()
+                account.getId(),
+                null,
+                1
         );
 
         expense = new Expense(
@@ -87,6 +89,7 @@ class ExpenseServiceTest {
                 createForm.createdAt(),
                 createForm.status(),
                 createForm.automaticDebit(),
+                null,
                 account
         );
         ReflectionTestUtils.setField(expense, "id", UUID.randomUUID());
@@ -99,9 +102,10 @@ class ExpenseServiceTest {
         when(accountService.findById(account.getId(), userId)).thenReturn(account);
         when(expenseRepository.save(any(Expense.class))).thenReturn(expense);
 
-        Expense result = expenseService.create(createForm, user);
+        List<Expense> result = expenseService.create(createForm, user);
 
         assertNotNull(result);
+        assertFalse(result.isEmpty());
         assertEquals(1500L, account.getBalanceInCents());
         verify(expenseRepository).save(any(Expense.class));
     }
@@ -117,7 +121,7 @@ class ExpenseServiceTest {
                 expenseService.create(createForm, user)
         );
 
-        assertEquals("Saldo insuficiente para registrar a despesa.", exception.getMessage());
+        assertEquals("Saldo insuficiente.", exception.getMessage());
         verify(expenseRepository, never()).save(any());
     }
 
@@ -187,7 +191,6 @@ class ExpenseServiceTest {
         assertEquals(1200L, account.getBalanceInCents());
         verify(expenseRepository).save(expense);
     }
-
 
     @Test
     @DisplayName("Should throw exception when update results in negative balance")
