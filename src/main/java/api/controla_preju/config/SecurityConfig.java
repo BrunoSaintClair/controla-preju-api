@@ -39,6 +39,14 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/auth/reject-registration").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/users/reset-password").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/users/complete-reset-password").permitAll()
+                                .requestMatchers(
+                                        "/api/v1/swagger-ui.html",
+                                        "/api/v1/swagger-ui/**",
+                                        "/api/v1/v3/api-docs/**",
+                                        "/swagger-ui.html",
+                                        "/swagger-ui/**",
+                                        "/v3/api-docs/**"
+                                ).permitAll()
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
