@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -32,6 +33,9 @@ public class CreditCard {
 
     @ManyToOne
     private User user;
+
+    @OneToMany(mappedBy = "creditCard", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Invoice> invoices;
 
     public CreditCard(String name, long limitInCents, int closingDay, int dueDay, User user) {
         this.name = name;

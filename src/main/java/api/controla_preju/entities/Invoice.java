@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -31,6 +33,9 @@ public class Invoice {
 
     @ManyToOne
     private CreditCard creditCard;
+
+    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Expense> expenses;
 
     public Invoice(int month, int year, long totalAmountInCents, InvoiceStatus status, CreditCard creditCard) {
         this.month = month;
