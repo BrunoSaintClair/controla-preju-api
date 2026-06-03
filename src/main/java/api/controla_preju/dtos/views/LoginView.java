@@ -4,5 +4,5 @@ import api.controla_preju.entities.enums.Role;
 
 import java.util.UUID;
 
-public record LoginView(UUID userId, String userName, Role role, String tokenType, String token) {
+public record LoginView(UUID userId, String userName, Role role, String tokenType, String accessToken, String refreshToken) {
 }

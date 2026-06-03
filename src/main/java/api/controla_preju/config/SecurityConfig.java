@@ -35,6 +35,8 @@ public class SecurityConfig {
                         authorize -> authorize
                                 .requestMatchers(HttpMethod.POST, "/users").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/auth/logout").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/auth/confirm-registration").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/auth/reject-registration").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/users/reset-password").permitAll()

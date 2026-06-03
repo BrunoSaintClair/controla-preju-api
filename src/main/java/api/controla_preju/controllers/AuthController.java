@@ -1,19 +1,20 @@
 package api.controla_preju.controllers;
 
 import api.controla_preju.dtos.forms.LoginForm;
+import api.controla_preju.dtos.forms.RefreshTokenRequestForm;
 import api.controla_preju.dtos.views.LoginView;
+import api.controla_preju.dtos.views.TokenView;
 import api.controla_preju.entities.User;
 import api.controla_preju.entities.enums.UserStatus;
 import api.controla_preju.exceptions.PasswordOrEmailInvalidException;
 import api.controla_preju.repositories.UserRepository;
+import api.controla_preju.services.AuthService;
 import api.controla_preju.services.TokenService;
 import api.controla_preju.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -21,30 +22,40 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
     private final TokenService tokenService;
     private final UserRepository userRepository;
     private final UserService userService;
+    private final AuthService authService;
 
-    public AuthController(AuthenticationManager authenticationManager, TokenService tokenService,
-                          UserRepository userRepository, UserService userService) {
-        this.authenticationManager = authenticationManager;
+    public AuthController(TokenService tokenService,
+                          UserRepository userRepository, UserService userService, AuthService authService) {
         this.tokenService = tokenService;
         this.userRepository = userRepository;
         this.userService = userService;
+        this.authService = authService;
     }
 
     @PostMapping("/login")
     public ResponseEntity<LoginView> login(@Valid @RequestBody LoginForm form) {
-        var emailAndPassword = new UsernamePasswordAuthenticationToken(form.email(), form.password());
         try {
-            var auth = authenticationManager.authenticate(emailAndPassword);
-            var user = (User) auth.getPrincipal();
-            var token = tokenService.generateToken((User) auth.getPrincipal());
-            return ResponseEntity.ok(new LoginView(user.getId(), user.getName(), user.getRole(), "Bearer", token));
+            TokenView tokenView = authService.login(form.email(), form.password());
+            User user = (User) authService.loadUserByUsername(form.email());
+            return ResponseEntity.ok(new LoginView(user.getId(), user.getName(), user.getRole(), "Bearer", tokenView.accessToken(), tokenView.refreshToken()));
         } catch (BadCredentialsException | InternalAuthenticationServiceException e) {
             throw new PasswordOrEmailInvalidException("Email e/ou senha inválidos.");
         }
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginView> refresh(@Valid @RequestBody RefreshTokenRequestForm form) {
+        TokenView tokenView = authService.refreshAccessToken(form.refreshToken());
+        return ResponseEntity.ok(new LoginView(null, null, null, "Bearer", tokenView.accessToken(), tokenView.refreshToken()));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@Valid @RequestBody RefreshTokenRequestForm form) {
+        authService.revokeRefreshToken(form.refreshToken());
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/confirm-registration")
