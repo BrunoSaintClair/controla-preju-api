@@ -3,6 +3,8 @@ package api.controla_preju.repositories;
 import api.controla_preju.entities.Transfer;
 import api.controla_preju.entities.enums.TransactionStatus;
 import api.controla_preju.repositories.jpa.TransferJpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -31,24 +33,24 @@ public class TransferRepository {
         transferJpaRepository.delete(transfer);
     }
 
-    public List<Transfer> findAllByUserId(UUID userId) {
-        return transferJpaRepository.findAllByUserId(userId);
+    public Page<Transfer> findAllByUserId(UUID userId, Pageable pageable) {
+        return transferJpaRepository.findAllByUserId(userId, pageable);
     }
 
-    public List<Transfer> findAllBySourceAccountId(UUID sourceAccountId) {
-        return transferJpaRepository.findAllBySourceAccountId(sourceAccountId);
+    public Page<Transfer> findAllBySourceAccountId(UUID sourceAccountId, Pageable pageable) {
+        return transferJpaRepository.findAllBySourceAccountId(sourceAccountId, pageable);
     }
 
-    public List<Transfer> findAllByDestinationAccountId(UUID destinationAccountId) {
-        return transferJpaRepository.findAllByDestinationAccountId(destinationAccountId);
+    public Page<Transfer> findAllByDestinationAccountId(UUID destinationAccountId, Pageable pageable) {
+        return transferJpaRepository.findAllByDestinationAccountId(destinationAccountId, pageable);
     }
 
-    public List<Transfer> findAllByUserIdAndYearAndMonth(UUID userId, int year, int month) {
-        return transferJpaRepository.findAllByUserIdAndYearAndMonth(userId, year, month);
+    public Page<Transfer> findAllByUserIdAndYearAndMonth(UUID userId, int year, int month, Pageable pageable) {
+        return transferJpaRepository.findAllByUserIdAndYearAndMonth(userId, year, month, pageable);
     }
 
-    public List<Transfer> findAllByUserIdAndYearAndMonthAndDay(UUID userId, int year, int month, int day) {
-        return transferJpaRepository.findAllByUserIdAndYearAndMonthAndDay(userId, year, month, day);
+    public Page<Transfer> findAllByUserIdAndYearAndMonthAndDay(UUID userId, int year, int month, int day, Pageable pageable) {
+        return transferJpaRepository.findAllByUserIdAndYearAndMonthAndDay(userId, year, month, day, pageable);
     }
 
     public boolean existsDuplicate(String title, LocalDateTime createdAt, long amountInCents) {

@@ -5,12 +5,15 @@ import api.controla_preju.dtos.forms.UpdateTransferForm;
 import api.controla_preju.dtos.views.TransferDetailsView;
 import api.controla_preju.services.TransferService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -51,14 +54,13 @@ public class TransferController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TransferDetailsView>> getAllByUser(@AuthenticationPrincipal(expression = "id") UUID userId,
+    public ResponseEntity<Page<TransferDetailsView>> getAllByUser(@AuthenticationPrincipal(expression = "id") UUID userId,
                                                                   @RequestParam(required = false) Optional<Integer> year,
                                                                   @RequestParam(required = false) Optional<Integer> month,
-                                                                  @RequestParam(required = false) Optional<Integer> day) {
-        List<TransferDetailsView> transfers = transferService.findAllByUserId(userId, year, month, day)
-                .stream()
-                .map(TransferDetailsView::new)
-                .toList();
+                                                                  @RequestParam(required = false) Optional<Integer> day,
+                                                                  @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        var transfers = transferService.findAllByUserId(userId, year, month, day, pageable)
+                .map(TransferDetailsView::new);
         return ResponseEntity.ok(transfers);
     }
 

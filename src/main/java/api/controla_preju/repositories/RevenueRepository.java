@@ -4,6 +4,8 @@ import api.controla_preju.entities.Revenue;
 import api.controla_preju.entities.enums.RevenueCategory;
 import api.controla_preju.entities.enums.TransactionStatus;
 import api.controla_preju.repositories.jpa.RevenueJpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -32,28 +34,28 @@ public class RevenueRepository {
         revenueJpaRepository.delete(revenue);
     }
 
-    public List<Revenue> findAllByUserId(UUID userId){
-        return revenueJpaRepository.findAllByUserId(userId);
+    public Page<Revenue> findAllByUserId(UUID userId, Pageable pageable){
+        return revenueJpaRepository.findAllByUserId(userId, pageable);
     }
 
-    public List<Revenue> findAllByAccountId(UUID accountId) {
-        return revenueJpaRepository.findAllByAccountId(accountId);
+    public Page<Revenue> findAllByAccountId(UUID accountId, Pageable pageable) {
+        return revenueJpaRepository.findAllByAccountId(accountId, pageable);
     }
 
-    public List<Revenue> findAllByAccountIdAndYearAndMonth(UUID accountId, int year, int month) {
-        return revenueJpaRepository.findAllByAccountIdAndYearAndMonth(accountId, year, month);
+    public Page<Revenue> findAllByAccountIdAndYearAndMonth(UUID accountId, int year, int month, Pageable pageable) {
+        return revenueJpaRepository.findAllByAccountIdAndYearAndMonth(accountId, year, month, pageable);
     }
 
-    public List<Revenue> findAllByAccountIdAndYearAndMonthAndDay(UUID accountId, int year, int month, int day) {
-        return revenueJpaRepository.findAllByAccountIdAndYearAndMonthAndDay(accountId, year, month, day);
+    public Page<Revenue> findAllByAccountIdAndYearAndMonthAndDay(UUID accountId, int year, int month, int day, Pageable pageable) {
+        return revenueJpaRepository.findAllByAccountIdAndYearAndMonthAndDay(accountId, year, month, day, pageable);
     }
 
-    public List<Revenue> findAllByUserIdAndCategory(UUID userId, RevenueCategory category) {
-        return revenueJpaRepository.findAllByUserIdAndCategory(userId, category);
+    public Page<Revenue> findAllByUserIdAndCategory(UUID userId, RevenueCategory category, Pageable pageable) {
+        return revenueJpaRepository.findAllByUserIdAndCategory(userId, category, pageable);
     }
 
-    public List<Revenue> findAllByAccountIdAndCategory(UUID accountId, RevenueCategory category) {
-        return revenueJpaRepository.findAllByAccountIdAndCategory(accountId, category);
+    public Page<Revenue> findAllByAccountIdAndCategory(UUID accountId, RevenueCategory category, Pageable pageable) {
+        return revenueJpaRepository.findAllByAccountIdAndCategory(accountId, category, pageable);
     }
 
     public boolean existsDuplicate(String title, LocalDateTime createdAt, long amountInCents, RevenueCategory category) {

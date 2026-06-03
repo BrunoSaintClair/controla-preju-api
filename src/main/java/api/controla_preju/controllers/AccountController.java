@@ -14,6 +14,7 @@ import api.controla_preju.services.TransferService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -85,57 +86,53 @@ public class AccountController {
     }
 
     @GetMapping("/{accountId}/revenues")
-    public ResponseEntity<List<RevenueDetailsView>> getRevenuesByAccount(
+    public ResponseEntity<Page<RevenueDetailsView>> getRevenuesByAccount(
                                                         @PathVariable UUID accountId,
                                                         @RequestParam(required = false) Optional<Integer> year,
                                                         @RequestParam(required = false) Optional<Integer> month,
                                                         @RequestParam(required = false) Optional<Integer> day,
                                                         @RequestParam(required = false) Optional<RevenueCategory> category,
-                                                        @AuthenticationPrincipal(expression = "id") UUID userId) {
-        List<RevenueDetailsView> revenues = revenueService
-                .findRevenuesByAccount(accountId, userId, year, month, day, category)
-                .stream()
-                .map(RevenueDetailsView::new)
-                .toList();
+                                                        @AuthenticationPrincipal(expression = "id") UUID userId,
+                                                        @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        var revenues = revenueService
+                .findRevenuesByAccount(accountId, userId, year, month, day, category, pageable)
+                .map(RevenueDetailsView::new);
         return ResponseEntity.ok(revenues);
     }
 
     @GetMapping("/{accountId}/expenses")
-    public ResponseEntity<List<ExpenseDetailsView>> getExpensesByAccount(
+    public ResponseEntity<Page<ExpenseDetailsView>> getExpensesByAccount(
                                                         @PathVariable UUID accountId,
                                                         @RequestParam(required = false) Optional<Integer> year,
                                                         @RequestParam(required = false) Optional<Integer> month,
                                                         @RequestParam(required = false) Optional<Integer> day,
                                                         @RequestParam(required = false) Optional<PaymentMethod> paymentMethod,
                                                         @RequestParam(required = false) Optional<ExpenseCategory> category,
-                                                        @AuthenticationPrincipal(expression = "id") UUID userId) {
-        List<ExpenseDetailsView> expenses = expenseService
-                .findExpensesByAccount(accountId, userId, year, month, day, paymentMethod, category)
-                .stream()
-                .map(ExpenseDetailsView::new)
-                .toList();
+                                                        @AuthenticationPrincipal(expression = "id") UUID userId,
+                                                        @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        var expenses = expenseService
+                .findExpensesByAccount(accountId, userId, year, month, day, paymentMethod, category, pageable)
+                .map(ExpenseDetailsView::new);
         return ResponseEntity.ok(expenses);
     }
 
     @GetMapping("/{accountId}/transfers/sent")
-    public ResponseEntity<List<TransferDetailsView>> getSentTransfersByAccount(
+    public ResponseEntity<Page<TransferDetailsView>> getSentTransfersByAccount(
                                                         @PathVariable UUID accountId,
-                                                        @AuthenticationPrincipal(expression = "id") UUID userId) {
-        List<TransferDetailsView> transfers = transferService.findAllBySourceAccount(accountId, userId)
-                .stream()
-                .map(TransferDetailsView::new)
-                .toList();
+                                                        @AuthenticationPrincipal(expression = "id") UUID userId,
+                                                        @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        var transfers = transferService.findAllBySourceAccount(accountId, userId, pageable)
+                .map(TransferDetailsView::new);
         return ResponseEntity.ok(transfers);
     }
 
     @GetMapping("/{accountId}/transfers/received")
-    public ResponseEntity<List<TransferDetailsView>> getReceivedTransfersByAccount(
+    public ResponseEntity<Page<TransferDetailsView>> getReceivedTransfersByAccount(
                                                         @PathVariable UUID accountId,
-                                                        @AuthenticationPrincipal(expression = "id") UUID userId) {
-        List<TransferDetailsView> transfers = transferService.findAllByDestinationAccount(accountId, userId)
-                .stream()
-                .map(TransferDetailsView::new)
-                .toList();
+                                                        @AuthenticationPrincipal(expression = "id") UUID userId,
+                                                        @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        var transfers = transferService.findAllByDestinationAccount(accountId, userId, pageable)
+                .map(TransferDetailsView::new);
         return ResponseEntity.ok(transfers);
     }
 

@@ -80,9 +80,7 @@ public class AccountService {
 
     @Transactional
     public void delete(Account account) {
-        List<Expense> expenses = expenseRepository.findAllByAccountId(account.getId());
-        boolean hasPendingAutomations = expenses.stream()
-                .anyMatch(e -> e.isAutomaticDebit() && e.getStatus() == TransactionStatus.PENDING);
+        boolean hasPendingAutomations = expenseRepository.existsByAccountIdAndStatusAndAutomaticDebitTrue(account.getId(), TransactionStatus.PENDING);
 
         if (hasPendingAutomations) {
             throw new BusinessException("Não é possível excluir esta conta, pois existem débitos automáticos pendentes vinculados a ela.");

@@ -12,6 +12,8 @@ import api.controla_preju.exceptions.BusinessException;
 import api.controla_preju.repositories.AccountRepository;
 import api.controla_preju.repositories.ExpenseRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -177,32 +179,32 @@ public class ExpenseService {
         return expenseRepository.save(expense);
     }
 
-    public List<Expense> findAllByUserId(UUID userId, Optional<PaymentMethod> paymentMethod, Optional<ExpenseCategory> category) {
-        if (paymentMethod.isPresent()) return expenseRepository.findAllByUserIdAndPaymentMethod(userId, paymentMethod.get());
-        if (category.isPresent()) return expenseRepository.findAllByUserIdAndCategory(userId, category.get());
-        return expenseRepository.findAllByUserId(userId);
+    public Page<Expense> findAllByUserId(UUID userId, Optional<PaymentMethod> paymentMethod, Optional<ExpenseCategory> category, Pageable pageable) {
+        if (paymentMethod.isPresent()) return expenseRepository.findAllByUserIdAndPaymentMethod(userId, paymentMethod.get(), pageable);
+        if (category.isPresent()) return expenseRepository.findAllByUserIdAndCategory(userId, category.get(), pageable);
+        return expenseRepository.findAllByUserId(userId, pageable);
     }
 
-    public List<Expense> findExpensesByAccount(UUID accountId, UUID userId,
+    public Page<Expense> findExpensesByAccount(UUID accountId, UUID userId,
                                                Optional<Integer> year, Optional<Integer> month,
                                                Optional<Integer> day, Optional<PaymentMethod> paymentMethod,
-                                               Optional<ExpenseCategory> category) {
+                                               Optional<ExpenseCategory> category, Pageable pageable) {
         accountService.findById(accountId, userId);
 
         if (paymentMethod.isPresent()) {
-            return expenseRepository.findAllByAccountIdAndPaymentMethod(accountId, paymentMethod.get());
+            return expenseRepository.findAllByAccountIdAndPaymentMethod(accountId, paymentMethod.get(), pageable);
         }
         if (category.isPresent()) {
-            return expenseRepository.findAllByAccountIdAndCategory(accountId, category.get());
+            return expenseRepository.findAllByAccountIdAndCategory(accountId, category.get(), pageable);
         }
         if (year.isPresent() && month.isPresent() && day.isPresent()) {
-            return expenseRepository.findAllByAccountIdAndYearAndMonthAndDay(accountId, year.get(), month.get(), day.get());
+            return expenseRepository.findAllByAccountIdAndYearAndMonthAndDay(accountId, year.get(), month.get(), day.get(), pageable);
         }
         if (year.isPresent() && month.isPresent()) {
-            return expenseRepository.findAllByAccountIdAndYearAndMonth(accountId, year.get(), month.get());
+            return expenseRepository.findAllByAccountIdAndYearAndMonth(accountId, year.get(), month.get(), pageable);
         }
         if (year.isEmpty() && month.isEmpty() && day.isEmpty()) {
-            return expenseRepository.findAllByAccountId(accountId);
+            return expenseRepository.findAllByAccountId(accountId, pageable);
         }
 
         throw new BusinessException("Combinação de filtros inválida ou não suportada.");

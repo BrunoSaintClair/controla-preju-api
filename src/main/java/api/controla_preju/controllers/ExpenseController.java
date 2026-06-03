@@ -9,6 +9,10 @@ import api.controla_preju.entities.enums.ExpenseCategory;
 import api.controla_preju.entities.enums.PaymentMethod;
 import api.controla_preju.services.ExpenseService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -36,15 +40,14 @@ public class ExpenseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ExpenseDetailsView>> getAllByUser(
+    public ResponseEntity<Page<ExpenseDetailsView>> getAllByUser(
             @AuthenticationPrincipal(expression = "id") UUID userId,
             @RequestParam(required = false) Optional<PaymentMethod> paymentMethod,
-            @RequestParam(required = false) Optional<ExpenseCategory> category) {
+            @RequestParam(required = false) Optional<ExpenseCategory> category,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        var expenses = expenseService.findAllByUserId(userId, paymentMethod, category)
-                .stream()
-                .map(ExpenseDetailsView::new)
-                .toList();
+        var expenses = expenseService.findAllByUserId(userId, paymentMethod, category, pageable)
+                .map(ExpenseDetailsView::new);
         return ResponseEntity.ok(expenses);
     }
 

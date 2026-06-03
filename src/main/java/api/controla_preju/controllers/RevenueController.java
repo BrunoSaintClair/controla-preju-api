@@ -8,12 +8,15 @@ import api.controla_preju.entities.User;
 import api.controla_preju.entities.enums.RevenueCategory;
 import api.controla_preju.services.RevenueService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -37,13 +40,12 @@ public class RevenueController {
     }
 
     @GetMapping
-    public ResponseEntity<List<RevenueDetailsView>> getAllByUser(
+    public ResponseEntity<Page<RevenueDetailsView>> getAllByUser(
                                                     @AuthenticationPrincipal(expression = "id") UUID userId,
-                                                    @RequestParam(required = false) Optional<RevenueCategory> category) {
-        var revenues = revenueService.findAllByUserId(userId, category)
-                .stream()
-                .map(RevenueDetailsView::new)
-                .toList();
+                                                    @RequestParam(required = false) Optional<RevenueCategory> category,
+                                                    @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        var revenues = revenueService.findAllByUserId(userId, category, pageable)
+                .map(RevenueDetailsView::new);
         return ResponseEntity.ok(revenues);
     }
 

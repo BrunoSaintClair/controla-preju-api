@@ -12,6 +12,8 @@ import api.controla_preju.exceptions.BusinessException;
 import api.controla_preju.repositories.AccountRepository;
 import api.controla_preju.repositories.TransferRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -131,28 +133,28 @@ public class TransferService {
         transferRepository.delete(transfer);
     }
 
-    public List<Transfer> findAllByUserId(UUID userId, Optional<Integer> year, Optional<Integer> month, Optional<Integer> day) {
+    public Page<Transfer> findAllByUserId(UUID userId, Optional<Integer> year, Optional<Integer> month, Optional<Integer> day, Pageable pageable) {
         if (year.isPresent() && month.isPresent() && day.isPresent()) {
-            return transferRepository.findAllByUserIdAndYearAndMonthAndDay(userId, year.get(), month.get(), day.get());
+            return transferRepository.findAllByUserIdAndYearAndMonthAndDay(userId, year.get(), month.get(), day.get(), pageable);
         }
         if (year.isPresent() && month.isPresent()) {
-            return transferRepository.findAllByUserIdAndYearAndMonth(userId, year.get(), month.get());
+            return transferRepository.findAllByUserIdAndYearAndMonth(userId, year.get(), month.get(), pageable);
         }
         if (year.isEmpty() && month.isEmpty() && day.isEmpty()) {
-            return transferRepository.findAllByUserId(userId);
+            return transferRepository.findAllByUserId(userId, pageable);
         }
 
         throw new BusinessException("Combinação de filtros de data inválida. Forneça ano/mês ou ano/mês/dia.");
     }
 
-    public List<Transfer> findAllBySourceAccount(UUID accountId, UUID userId) {
+    public Page<Transfer> findAllBySourceAccount(UUID accountId, UUID userId, Pageable pageable) {
         accountService.findById(accountId, userId);
-        return transferRepository.findAllBySourceAccountId(accountId);
+        return transferRepository.findAllBySourceAccountId(accountId, pageable);
     }
 
-    public List<Transfer> findAllByDestinationAccount(UUID accountId, UUID userId) {
+    public Page<Transfer> findAllByDestinationAccount(UUID accountId, UUID userId, Pageable pageable) {
         accountService.findById(accountId, userId);
-        return transferRepository.findAllByDestinationAccountId(accountId);
+        return transferRepository.findAllByDestinationAccountId(accountId, pageable);
     }
 
     @Transactional

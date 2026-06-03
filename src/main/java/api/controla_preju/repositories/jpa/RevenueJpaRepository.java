@@ -3,6 +3,8 @@ package api.controla_preju.repositories.jpa;
 import api.controla_preju.entities.Revenue;
 import api.controla_preju.entities.enums.RevenueCategory;
 import api.controla_preju.entities.enums.TransactionStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,12 +14,12 @@ import java.util.List;
 import java.util.UUID;
 
 public interface RevenueJpaRepository extends JpaRepository<Revenue, UUID> {
-    List<Revenue> findAllByAccountId(UUID accountId);
+    Page<Revenue> findAllByAccountId(UUID accountId, Pageable pageable);
 
-    List<Revenue> findAllByAccountIdAndCategory(UUID accountId, RevenueCategory category);
+    Page<Revenue> findAllByAccountIdAndCategory(UUID accountId, RevenueCategory category, Pageable pageable);
 
     @Query("SELECT r FROM Revenue r WHERE r.account.user.id = :userId")
-    List<Revenue> findAllByUserId(@Param("userId") UUID userId);
+    Page<Revenue> findAllByUserId(@Param("userId") UUID userId, Pageable pageable);
 
     @Query("""
             SELECT r FROM Revenue r
@@ -25,7 +27,7 @@ public interface RevenueJpaRepository extends JpaRepository<Revenue, UUID> {
             AND EXTRACT(YEAR FROM r.createdAt) = :year
             AND EXTRACT(MONTH FROM r.createdAt) = :month
             """)
-    List<Revenue> findAllByAccountIdAndYearAndMonth(UUID accountId, int year, int month);
+    Page<Revenue> findAllByAccountIdAndYearAndMonth(UUID accountId, int year, int month, Pageable pageable);
 
     @Query("""
             SELECT r FROM Revenue r
@@ -34,10 +36,10 @@ public interface RevenueJpaRepository extends JpaRepository<Revenue, UUID> {
             AND EXTRACT(MONTH FROM r.createdAt) = :month
             AND EXTRACT(DAY FROM r.createdAt) = :day
             """)
-    List<Revenue> findAllByAccountIdAndYearAndMonthAndDay(UUID accountId, int year, int month, int day);
+    Page<Revenue> findAllByAccountIdAndYearAndMonthAndDay(UUID accountId, int year, int month, int day, Pageable pageable);
 
     @Query("SELECT r FROM Revenue r WHERE r.account.user.id = :userId AND r.category = :category")
-    List<Revenue> findAllByUserIdAndCategory(@Param("userId") UUID userId, @Param("category") RevenueCategory category);
+    Page<Revenue> findAllByUserIdAndCategory(@Param("userId") UUID userId, @Param("category") RevenueCategory category, Pageable pageable);
 
     boolean existsByTitleAndCreatedAtAndAmountInCentsAndCategory(
             String title, LocalDateTime createdAt, long amountInCents, RevenueCategory category

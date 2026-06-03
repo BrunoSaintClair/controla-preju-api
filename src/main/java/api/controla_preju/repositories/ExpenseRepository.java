@@ -5,6 +5,8 @@ import api.controla_preju.entities.enums.ExpenseCategory;
 import api.controla_preju.entities.enums.PaymentMethod;
 import api.controla_preju.entities.enums.TransactionStatus;
 import api.controla_preju.repositories.jpa.ExpenseJpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -33,36 +35,40 @@ public class ExpenseRepository {
         expenseJpaRepository.delete(expense);
     }
 
-    public List<Expense> findAllByUserId(UUID userId){
-        return expenseJpaRepository.findAllByUserId(userId);
+    public Page<Expense> findAllByUserId(UUID userId, Pageable pageable){
+        return expenseJpaRepository.findAllByUserId(userId, pageable);
     }
 
-    public List<Expense> findAllByAccountId(UUID accountId) {
-        return expenseJpaRepository.findAllByAccountId(accountId);
+    public Page<Expense> findAllByAccountId(UUID accountId, Pageable pageable) {
+        return expenseJpaRepository.findAllByAccountId(accountId, pageable);
     }
 
-    public List<Expense> findAllByAccountIdAndYearAndMonth(UUID accountId, int year, int month) {
-        return expenseJpaRepository.findAllByAccountIdAndYearAndMonth(accountId, year, month);
+    public Page<Expense> findAllByAccountIdAndYearAndMonth(UUID accountId, int year, int month, Pageable pageable) {
+        return expenseJpaRepository.findAllByAccountIdAndYearAndMonth(accountId, year, month, pageable);
     }
 
-    public List<Expense> findAllByAccountIdAndYearAndMonthAndDay(UUID accountId, int year, int month, int day) {
-        return expenseJpaRepository.findAllByAccountIdAndYearAndMonthAndDay(accountId, year, month, day);
+    public Page<Expense> findAllByAccountIdAndYearAndMonthAndDay(UUID accountId, int year, int month, int day, Pageable pageable) {
+        return expenseJpaRepository.findAllByAccountIdAndYearAndMonthAndDay(accountId, year, month, day, pageable);
     }
 
-    public List<Expense> findAllByUserIdAndPaymentMethod(UUID userId, PaymentMethod paymentMethod) {
-        return expenseJpaRepository.findAllByUserIdAndPaymentMethod(userId, paymentMethod);
+    public Page<Expense> findAllByUserIdAndPaymentMethod(UUID userId, PaymentMethod paymentMethod, Pageable pageable) {
+        return expenseJpaRepository.findAllByUserIdAndPaymentMethod(userId, paymentMethod, pageable);
     }
 
-    public List<Expense> findAllByAccountIdAndPaymentMethod(UUID accountId, PaymentMethod paymentMethod) {
-        return expenseJpaRepository.findAllByAccountIdAndPaymentMethod(accountId, paymentMethod);
+    public Page<Expense> findAllByAccountIdAndPaymentMethod(UUID accountId, PaymentMethod paymentMethod, Pageable pageable) {
+        return expenseJpaRepository.findAllByAccountIdAndPaymentMethod(accountId, paymentMethod, pageable);
     }
 
-    public List<Expense> findAllByUserIdAndCategory(UUID userId, ExpenseCategory category) {
-        return expenseJpaRepository.findAllByUserIdAndCategory(userId, category);
+    public Page<Expense> findAllByUserIdAndCategory(UUID userId, ExpenseCategory category, Pageable pageable) {
+        return expenseJpaRepository.findAllByUserIdAndCategory(userId, category, pageable);
     }
 
-    public List<Expense> findAllByAccountIdAndCategory(UUID accountId, ExpenseCategory category) {
-        return expenseJpaRepository.findAllByAccountIdAndCategory(accountId, category);
+    public Page<Expense> findAllByAccountIdAndCategory(UUID accountId, ExpenseCategory category, Pageable pageable) {
+        return expenseJpaRepository.findAllByAccountIdAndCategory(accountId, category, pageable);
+    }
+
+    public boolean existsByAccountIdAndStatusAndAutomaticDebitTrue(UUID accountId, TransactionStatus status) {
+        return expenseJpaRepository.existsByAccountIdAndStatusAndAutomaticDebitTrue(accountId, status);
     }
 
     public boolean existsDuplicate(String title, LocalDateTime createdAt, long amountInCents, ExpenseCategory category) {

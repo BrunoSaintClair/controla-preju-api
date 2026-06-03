@@ -12,6 +12,8 @@ import api.controla_preju.exceptions.BusinessException;
 import api.controla_preju.repositories.AccountRepository;
 import api.controla_preju.repositories.RevenueRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -155,29 +157,30 @@ public class RevenueService {
         return revenueRepository.save(revenue);
     }
 
-    public List<Revenue> findAllByUserId(UUID userId, Optional<RevenueCategory> category) {
+    public Page<Revenue> findAllByUserId(UUID userId, Optional<RevenueCategory> category, Pageable pageable) {
         if (category.isPresent()) {
-            return revenueRepository.findAllByUserIdAndCategory(userId, category.get());
+            return revenueRepository.findAllByUserIdAndCategory(userId, category.get(), pageable);
         }
-        return revenueRepository.findAllByUserId(userId);
+        return revenueRepository.findAllByUserId(userId, pageable);
     }
 
-    public List<Revenue> findRevenuesByAccount(UUID accountId, UUID userId,
+    public Page<Revenue> findRevenuesByAccount(UUID accountId, UUID userId,
                                                Optional<Integer> year, Optional<Integer> month,
-                                               Optional<Integer> day, Optional<RevenueCategory> category) {
+                                               Optional<Integer> day, Optional<RevenueCategory> category,
+                                               Pageable pageable) {
         accountService.findById(accountId, userId);
 
         if (category.isPresent()) {
-            return revenueRepository.findAllByAccountIdAndCategory(accountId, category.get());
+            return revenueRepository.findAllByAccountIdAndCategory(accountId, category.get(), pageable);
         }
         if (year.isPresent() && month.isPresent() && day.isPresent()) {
-            return revenueRepository.findAllByAccountIdAndYearAndMonthAndDay(accountId, year.get(), month.get(), day.get());
+            return revenueRepository.findAllByAccountIdAndYearAndMonthAndDay(accountId, year.get(), month.get(), day.get(), pageable);
         }
         if (year.isPresent() && month.isPresent()) {
-            return revenueRepository.findAllByAccountIdAndYearAndMonth(accountId, year.get(), month.get());
+            return revenueRepository.findAllByAccountIdAndYearAndMonth(accountId, year.get(), month.get(), pageable);
         }
         if (year.isEmpty() && month.isEmpty() && day.isEmpty()) {
-            return revenueRepository.findAllByAccountId(accountId);
+            return revenueRepository.findAllByAccountId(accountId, pageable);
         }
 
         throw new BusinessException("Combinação de filtros inválida ou não suportada.");
