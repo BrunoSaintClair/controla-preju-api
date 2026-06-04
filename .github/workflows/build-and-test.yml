@@ -41,3 +41,15 @@ jobs:
           SPRING_DATASOURCE_USERNAME: user
           SPRING_DATASOURCE_PASSWORD: password
           API_SECURITY_TOKEN_SECRET_KEY: ${{ secrets.JWT_SECRET || 'test_secret_key_for_ci' }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: controla-preju:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

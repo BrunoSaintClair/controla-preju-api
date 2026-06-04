@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:15
+    container_name: controla-preju-db
+    environment:
+      POSTGRES_DB: controlapreju_dev
+      POSTGRES_USER: ${DB_USERNAME:-controlaprejuizodev}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-controlaprejuizodev}
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: controla-preju-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/controlapreju_dev
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME:-controlaprejuizodev}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-controlaprejuizodev}
+      API_SECURITY_TOKEN_SECRET_KEY: ${JWT_SECRET:-dev_secret_key_for_local_use}
