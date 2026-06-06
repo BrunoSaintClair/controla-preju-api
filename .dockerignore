@@ -1,0 +1,36 @@
+# Build artifacts (Maven)
+target/
+*.jar
+*.war
+
+# IDEs e Editores
+.idea/
+.vscode/
+*.iml
+*.swp
+
+# Controle de Versão
+.git
+.github
+.gitignore
+.gitattributes
+
+# Docker e Configurações de Ambiente
+Dockerfile
+docker-compose.yml
+.env
+.env.example
+
+# Logs e arquivos temporários
+*.log
+tmp/
+
+# Maven Wrapper e Help
+.mvn/
+mvnw
+mvnw.cmd
+HELP.md
+
+# Documentação
+README.md
+LICENSE
